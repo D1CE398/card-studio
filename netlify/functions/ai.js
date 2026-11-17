@@ -13,7 +13,7 @@ export async function handler(event) {
   try {
     const body = JSON.parse(event.body || "{}");
 
-    // 1. VISION AI ЧЕРЕЗ GEMINI (распознавание товара по фото + подбор иконок и SEO-описания)
+    // 1. VISION AI ЧЕРЕЗ GEMINI 3.8 FLASH (распознавание фото + подбор иконок и SEO-описания)
     if (body.action === "analyze_product") {
       const apiKey = process.env.GEMINI_API_KEY || "";
       const prompt = `Ты топ-дизайнер карточек Wildberries и Ozon. Посмотри на фото товара (и учти подсказку названия, если она есть: "${body.title || ""}"). Определи, что это за товар, и придумай продающую инфографику и SEO-описание на русском языке.
@@ -33,7 +33,7 @@ export async function handler(event) {
         parts.push({ inline_data: { mime_type: "image/jpeg", data: base64Data } });
       }
 
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
       const res = await fetch(geminiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -52,7 +52,7 @@ export async function handler(event) {
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true, data: parsed }) };
     }
 
-    // 2. ОТПРАВКА ГОТОВОЙ КАРТОЧКИ ПРЯМО В ЧАТ TELEGRAM (решает проблему скачивания на телефонах)
+    // 2. ОТПРАВКА ГОТОВОЙ КАРТОЧКИ ПРЯМО В ЧАТ TELEGRAM
     if (body.action === "send_to_chat") {
       const base64Data = body.image.replace(/^data:image\/\w+;base64,/, "");
       const imgBuffer = Buffer.from(base64Data, "base64");
