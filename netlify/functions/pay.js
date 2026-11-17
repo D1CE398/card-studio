@@ -1,4 +1,4 @@
-const BOT_TOKEN = "9263036364:AAFQuaLSd28HEULbdGHwoKN_rXbILfzpbcA";
+const BOT_TOKEN = "9263036364:AAFQuaLsD28HEULbDgHwoKN_rXbILfzpbcA";
 
 export async function handler(event) {
   const headers = {
