@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>MP Design Studio AI — Карточки для WB и Ozon</title>
+  <title>MP Design Studio AI — Editorial Карточки для WB и Ozon</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script type="module">
     import { removeBackground } from "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm";
@@ -100,7 +100,7 @@
       max-height: 310px;
       width: auto;
       border-radius: 10px;
-      background: #161922;
+      background: #e5e7eb;
     }
 
     .stage-meta {
@@ -243,13 +243,13 @@
       cursor: pointer;
     }
     .theme-card.active { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.14); }
-    .theme-swatch { width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0; }
+    .theme-swatch { width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15); }
     .theme-name { font-size: 12px; font-weight: 700; color: #fff; }
     .theme-desc { font-size: 10px; color: var(--muted); }
 
     .segmented {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       background: var(--bg);
       padding: 4px;
       border-radius: 10px;
@@ -259,7 +259,7 @@
       background: transparent;
       border: none;
       color: var(--muted);
-      padding: 8px 4px;
+      padding: 9px 6px;
       font-size: 11px;
       font-weight: 700;
       border-radius: 7px;
@@ -282,11 +282,11 @@
 
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field span { font-size: 11px; color: var(--muted); font-weight: 600; }
-    input[type="text"], textarea {
+    input[type="text"], select, textarea {
       background: var(--bg);
       border: 1px solid var(--border);
       color: #fff;
-      padding: 10px 12px;
+      padding: 10px 11px;
       border-radius: 10px;
       font-size: 13px;
       outline: none;
@@ -297,8 +297,8 @@
       min-height: 105px;
       line-height: 1.45;
     }
-    input[type="text"]:focus, textarea:focus { border-color: #8b5cf6; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    input[type="text"]:focus, select:focus, textarea:focus { border-color: #8b5cf6; }
+    .icon-row { display: grid; grid-template-columns: 125px 1fr; gap: 8px; }
 
     .bottom-dock {
       position: fixed;
@@ -425,7 +425,7 @@
       <div class="brand-logo">MP</div>
       <div>
         <div class="brand-title">Design Studio AI</div>
-        <div class="brand-sub">WB • Ozon • Яндекс Маркет</div>
+        <div class="brand-sub">Editorial Lookbook • WB & Ozon</div>
       </div>
     </div>
     <button class="pro-badge" id="topProBtn" type="button">⭐ Тарифы / PRO</button>
@@ -443,7 +443,7 @@
 
   <nav class="tabs-bar">
     <button class="tab-btn active" type="button" data-tab="tabProduct">📸 Товар</button>
-    <button class="tab-btn" type="button" data-tab="tabStyle">🎨 AI-Стиль</button>
+    <button class="tab-btn" type="button" data-tab="tabStyle">🎨 Фон & Макет</button>
     <button class="tab-btn" type="button" data-tab="tabText">✍️ Тексты & SEO</button>
   </nav>
 
@@ -453,16 +453,16 @@
       <div class="card-box">
         <div class="section-label">
           <span>Фотография товара</span>
-          <span style="color:#a78bfa;">Neural Cutout + AI</span>
+          <span style="color:#a78bfa;">Neural Cutout + Gemini</span>
         </div>
         <label class="upload-zone" for="fileInput">
           <input type="file" id="fileInput" accept="image/*" />
           <div style="font-size:22px; margin-bottom:4px;">📷</div>
           <div style="font-weight:700; font-size:13px;" id="uploadLabelText">Загрузить фото из галереи</div>
-          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Нейросеть сама вырежет любой сложный фон и заполнит карточку</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Нейросеть вырежет фон и оформит карточку в стиле лукбука</div>
         </label>
-        <div class="grid-2">
-          <button class="btn btn-ai" id="analyzePhotoBtn" type="button" disabled>🧠 Распознать по фото</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button class="btn btn-ai" id="analyzePhotoBtn" type="button" disabled>🧠 Распознать заново</button>
           <button class="btn btn-ghost" id="restoreBgBtn" type="button" disabled>↩️ Исходное фото</button>
         </div>
         <div class="slider-item" id="toleranceBox" style="display:none;">
@@ -474,99 +474,111 @@
 
       <div class="card-box">
         <div class="section-label">
-          <span>Позиция на подиуме</span>
+          <span>Позиция товара в кадре</span>
           <span id="resetPosBtn" style="color:#8b5cf6; cursor:pointer; text-transform:none;">Сбросить</span>
         </div>
         <div class="slider-item">
-          <div class="slider-head"><span>Масштаб товара</span><span id="scaleVal">85%</span></div>
-          <input type="range" id="scaleRange" min="0.3" max="1.6" step="0.02" value="0.85" />
+          <div class="slider-head"><span>Масштаб товара</span><span id="scaleVal">95%</span></div>
+          <input type="range" id="scaleRange" min="0.35" max="1.6" step="0.02" value="0.95" />
         </div>
         <div class="slider-item">
           <div class="slider-head"><span>Сдвиг по горизонтали</span><span id="posXVal">0</span></div>
           <input type="range" id="posXRange" min="-250" max="250" step="5" value="0" />
         </div>
         <div class="slider-item">
-          <div class="slider-head"><span>Сдвиг по вертикали</span><span id="posYVal">55</span></div>
-          <input type="range" id="posYRange" min="-250" max="250" step="5" value="55" />
+          <div class="slider-head"><span>Сдвиг по вертикали</span><span id="posYVal">-10</span></div>
+          <input type="range" id="posYRange" min="-250" max="250" step="5" value="-10" />
         </div>
       </div>
     </div>
 
-    <!-- Вкладка 2: AI-Стиль -->
+    <!-- Вкладка 2: Фон и Макет -->
     <div class="tab-pane" id="tabStyle">
       <div class="card-box">
         <div class="section-label">
-          <span>Студийная сцена и освещение</span>
-          <span style="color:#38bdf8;">3D RENDER</span>
+          <span>Студийный фон (Циклорама)</span>
+          <span style="color:#38bdf8;">EDITORIAL</span>
         </div>
         <div class="themes-grid">
-          <div class="theme-card active" data-theme="wb_bright">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#6d28d9,#ec4899);"></div>
-            <div><div class="theme-name">WB Неон</div><div class="theme-desc">3D-студия & Фиолет</div></div>
+          <div class="theme-card active" data-theme="clean_light">
+            <div class="theme-swatch" style="background:linear-gradient(180deg,#f3f4f6,#d1d5db);"></div>
+            <div><div class="theme-name">Светлая студия</div><div class="theme-desc">Белая циклорама</div></div>
           </div>
-          <div class="theme-card" data-theme="dark_luxury">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#1e293b,#f59e0b);"></div>
-            <div><div class="theme-name">Премиум Голд</div><div class="theme-desc">Мрамор & Золото</div></div>
+          <div class="theme-card" data-theme="dark_graphite">
+            <div class="theme-swatch" style="background:linear-gradient(180deg,#27272a,#09090b);"></div>
+            <div><div class="theme-name">Графит Премиум</div><div class="theme-desc">Матовый тёмный</div></div>
           </div>
-          <div class="theme-card" data-theme="tech_blue">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#0284c7,#0f172a);"></div>
-            <div><div class="theme-name">Ozon Техно</div><div class="theme-desc">Кибер-подиум</div></div>
+          <div class="theme-card" data-theme="warm_beige">
+            <div class="theme-swatch" style="background:linear-gradient(180deg,#f5f0e6,#dfd6c5);"></div>
+            <div><div class="theme-name">Тёплый беж</div><div class="theme-desc">Травертин & Эко</div></div>
           </div>
-          <div class="theme-card" data-theme="eco_minimal">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#f5f2eb,#65a30d);"></div>
-            <div><div class="theme-name">Эко & Бьюти</div><div class="theme-desc">Камень & Листва</div></div>
-          </div>
-          <div class="theme-card" data-theme="sale_red">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#dc2626,#18181b);"></div>
-            <div><div class="theme-name">Хит Продаж</div><div class="theme-desc">Алый прожектор</div></div>
-          </div>
-          <div class="theme-card" data-theme="mint_fresh">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#0d9488,#064e3b);"></div>
-            <div><div class="theme-name">Изумруд</div><div class="theme-desc">Стекло & Вода</div></div>
+          <div class="theme-card" data-theme="urban_cool">
+            <div class="theme-swatch" style="background:linear-gradient(180deg,#e2e8f0,#94a3b8);"></div>
+            <div><div class="theme-name">Холодный бетон</div><div class="theme-desc">Урбан & Спорт</div></div>
           </div>
         </div>
-
-        <button class="btn btn-cyan" id="generateAiBgBtn" type="button">✨ Сгенерировать новый 3D-свет и боке</button>
       </div>
 
       <div class="card-box">
-        <div class="section-label">Подставка под товар</div>
-        <div class="segmented" id="podiumTypeGroup">
-          <button class="seg-btn active" type="button" data-podium="disc">3D Подиум</button>
-          <button class="seg-btn" type="button" data-podium="shadow">Парящий</button>
-          <button class="seg-btn" type="button" data-podium="none">Без тени</button>
+        <div class="section-label">Композиция инфографики</div>
+        <div class="segmented" id="layoutTypeGroup">
+          <button class="seg-btn active" type="button" data-layout="grid_bottom">📐 Сетка иконок снизу</button>
+          <button class="seg-btn" type="button" data-layout="callouts_arrows">↗️ Выноски со стрелками</button>
+        </div>
+        <div class="slider-item" style="margin-top:4px;">
+          <div class="slider-head"><span>Интенсивность тени под товаром</span><span id="shadowVal">45%</span></div>
+          <input type="range" id="shadowRange" min="0" max="100" step="5" value="45" />
         </div>
       </div>
     </div>
 
-    <!-- Вкладка 3: AI-Тексты, иконки и SEO-описание -->
+    <!-- Вкладка 3: Тексты, векторные иконки и SEO -->
     <div class="tab-pane" id="tabText">
       <div class="card-box">
-        <div class="section-label">Нейро-копирайтер и подбор иконок</div>
+        <div class="section-label">Арт-директор Gemini AI</div>
         <div class="field">
-          <span>Название товара (определяется по фото или вводится вручную)</span>
-          <input type="text" id="titleInput" value="ТЕРМОКРУЖКА PRO" />
+          <span>Название товара (определяется по фото или редактируется вручную)</span>
+          <input type="text" id="titleInput" value="КРОССОВКИ SUPERSTAR" />
         </div>
-        <button class="btn btn-ai" id="generateAiTextBtn" type="button">✨ Придумать иконки, плашки и SEO-описание</button>
+        <button class="btn btn-ai" id="generateAiTextBtn" type="button">✨ Сгенерировать стиль, иконки и описание</button>
         <div class="ai-status" id="aiTextStatus"></div>
 
         <div class="presets-scroll" style="margin-top:4px;">
-          <button class="chip" type="button" data-preset="thermo">☕ Термокружка</button>
-          <button class="chip" type="button" data-preset="tech">🎧 Наушники</button>
-          <button class="chip" type="button" data-preset="cosmetic">✨ Сыворотка</button>
-          <button class="chip" type="button" data-preset="clothes">👕 Худи</button>
+          <button class="chip" type="button" data-preset="sneakers_look">👟 Лукбук (Сетка)</button>
+          <button class="chip" type="button" data-preset="sneakers_detail">↗️ Детали (Стрелки)</button>
+          <button class="chip" type="button" data-preset="cosmetic_clean">🌿 Бьюти / Эко</button>
+          <button class="chip" type="button" data-preset="tech_dark">🎧 Техника (Графит)</button>
         </div>
       </div>
 
       <div class="card-box">
-        <div class="section-label">Редактирование инфографики на карточке</div>
-        <div class="field"><span>Верхний стикер (бейдж)</span><input type="text" id="badgeInput" value="ХИТ ПРОДАЖ 2026" /></div>
-        <div class="field"><span>Подзаголовок / Характеристика</span><input type="text" id="subInput" value="Нержавеющая сталь • Вакуумная изоляция" /></div>
-        <div class="grid-2">
-          <div class="field"><span>Иконка + Плашка 1</span><input type="text" id="b1Input" value="🔥 Тепло до 12 ч" /></div>
-          <div class="field"><span>Иконка + Плашка 2</span><input type="text" id="b2Input" value="💧 100% герметична" /></div>
+        <div class="section-label">Редактирование типографики и иконок</div>
+        <div class="field"><span>Гигантское слово на фоне (во всю ширину)</span><input type="text" id="bgWordInput" value="УНИВЕРСАЛЬНОСТЬ" /></div>
+        <div class="field"><span>Дополнительный слоган / Акцент</span><input type="text" id="subInput" value="УСТОЙЧИВЫЕ МАТЕРИАЛЫ" /></div>
+
+        <div class="field">
+          <span>Блок 1 (Иконка + Подпись)</span>
+          <div class="icon-row">
+            <select id="icon1Select"></select>
+            <input type="text" id="label1Input" value="ПОД ДЖИНСЫ" />
+          </div>
         </div>
-        <div class="field"><span>Нижний акцентный баннер</span><input type="text" id="b3Input" value="🛡️ Гарантия 2 года • Подарочная коробка" /></div>
+
+        <div class="field">
+          <span>Блок 2 (Иконка + Подпись)</span>
+          <div class="icon-row">
+            <select id="icon2Select"></select>
+            <input type="text" id="label2Input" value="С ПЛАТЬЯМИ" />
+          </div>
+        </div>
+
+        <div class="field">
+          <span>Блок 3 (Иконка + Подпись)</span>
+          <div class="icon-row">
+            <select id="icon3Select"></select>
+            <input type="text" id="label3Input" value="ПОД ШОРТЫ" />
+          </div>
+        </div>
       </div>
 
       <div class="card-box">
@@ -574,7 +586,7 @@
           <span>SEO-описание для карточки WB / Ozon</span>
           <span id="copyDescBtn" style="color:#38bdf8; cursor:pointer; text-transform:none;">📋 Скопировать</span>
         </div>
-        <textarea id="seoDescInput">Стильная термокружка PRO из пищевой нержавеющей стали с двойными стенками и вакуумной изоляцией. Сохраняет напитки горячими до 12 часов, а холодными — до 24 часов. Герметичная крышка с защитой от протекания позволяет носить кружку в сумке или рюкзаке. Идеально подходит для автомобиля, офиса, прогулок и в качестве подарка.</textarea>
+        <textarea id="seoDescInput">Классические кроссовки из износостойкой экокожи с фирменным мыском и анатомической поддержкой пятки. Универсальный силуэт легко сочетается с джинсами, платьями, шортами и повседневным гардеробом. Мягкая стелька и гибкая резиновая подошва обеспечивают комфорт при ходьбе в течение всего дня.</textarea>
       </div>
     </div>
   </div>
@@ -659,9 +671,8 @@
     let originalImg = null;
     let originalFile = null;
     let productImg = null;
-    let currentTheme = "wb_bright";
-    let podiumStyle = "disc";
-    let bokehSeed = 1;
+    let currentTheme = "clean_light";
+    let currentLayout = "grid_bottom";
 
     let credits = Number(localStorage.getItem("mp_studio_credits") || 0);
     let selectedStars = 150;
@@ -669,74 +680,203 @@
     let selectedTitle = "Пакет 10 карточек HD";
     let lastExportBlob = null;
 
+    // Библиотека векторных Line-Art иконок (SVG Paths в координатах 0..64)
+    const VECTOR_ICONS = {
+      jeans: {
+        name: "Джинсы",
+        paths: [
+          "M16 10 H48 L50 54 H35 L32 28 L29 54 H14 Z",
+          "M16 17 H48",
+          "M32 10 V17",
+          "M16 23 C21 23 23 20 23 17",
+          "M48 23 C43 23 41 20 41 17"
+        ]
+      },
+      dress: {
+        name: "Платье / Юбка",
+        paths: [
+          "M22 12 H42 L44 22 H20 Z",
+          "M20 22 L11 52 H53 L44 22",
+          "M27 22 L23 52",
+          "M37 22 L41 52",
+          "M32 22 V52"
+        ]
+      },
+      shorts: {
+        name: "Шорты",
+        paths: [
+          "M15 14 H49 L53 46 H35 L32 34 L29 46 H11 Z",
+          "M15 20 H49",
+          "M32 14 V26",
+          "M24 20 C24 25 20 28 14 28",
+          "M40 20 C40 25 44 28 50 28"
+        ]
+      },
+      eco: {
+        name: "Эко / Кожа",
+        paths: [
+          "M32 8 L40 13 L49 14 L52 23 L56 32 L52 41 L49 50 L40 51 L32 56 L24 51 L15 50 L12 41 L8 32 L12 23 L15 14 L24 13 Z",
+          "M22 40 C22 26 32 20 42 20 C42 32 36 42 22 40 Z",
+          "M22 40 L37 25"
+        ]
+      },
+      shield: {
+        name: "Защита / Прочность",
+        paths: [
+          "M32 8 L50 15 V31 C50 43 42 51 32 56 C22 51 14 43 14 31 V15 Z",
+          "M24 32 L30 38 L41 25"
+        ]
+      },
+      feather: {
+        name: "Лёгкость",
+        paths: [
+          "M48 12 C34 12 20 24 16 48 L26 38 C36 38 48 28 48 12 Z",
+          "M14 50 L42 18",
+          "M26 30 H36",
+          "M22 36 H32"
+        ]
+      },
+      water: {
+        name: "Влагозащита",
+        paths: [
+          "M32 10 C32 10 16 28 16 40 C16 49 23 55 32 55 C41 55 48 49 48 40 C48 28 32 10 32 10 Z",
+          "M24 41 C24 45 27 48 31 48"
+        ]
+      },
+      battery: {
+        name: "Автономность",
+        paths: [
+          "M18 16 H46 V54 H18 Z",
+          "M26 10 H38 V16 H26 Z",
+          "M33 25 L26 36 H33 L30 46 L39 34 H32 Z"
+        ]
+      },
+      sparkle: {
+        name: "Эффект / Сияние",
+        paths: [
+          "M32 8 L37 25 L54 30 L37 35 L32 52 L27 35 L10 30 L27 25 Z",
+          "M48 10 L50 16 L56 18 L50 20 L48 26 L46 20 L40 18 L46 16 Z"
+        ]
+      },
+      check: {
+        name: "Гарантия / ГОСТ",
+        paths: [
+          "M32 10 A22 22 0 1 0 32 54 A22 22 0 1 0 32 10",
+          "M22 32 L29 39 L43 25"
+        ]
+      },
+      star: {
+        name: "Хит / Премиум",
+        paths: [
+          "M32 9 L39 23 L54 25 L43 36 L46 51 L32 44 L18 51 L21 36 L10 25 L25 23 Z"
+        ]
+      },
+      gear: {
+        name: "Технология",
+        paths: [
+          "M32 22 A10 10 0 1 0 32 42 A10 10 0 1 0 32 22",
+          "M32 10 V16 M32 48 V54 M10 32 H16 M48 32 H54 M16 16 L21 21 M43 43 L48 48 M48 16 L43 21 M21 43 L16 48"
+        ]
+      }
+    };
+
+    // Заполнение выпадающих списков иконок
+    function populateIconSelects() {
+      const ids = ["icon1Select", "icon2Select", "icon3Select"];
+      const defaults = ["jeans", "dress", "shorts"];
+      ids.forEach((id, idx) => {
+        const sel = document.getElementById(id);
+        Object.entries(VECTOR_ICONS).forEach(([key, obj]) => {
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = obj.name;
+          if (key === defaults[idx]) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener("change", drawCard);
+      });
+    }
+
     const THEMES = {
-      wb_bright: {
-        bgTop: "#3b0764", bgMid: "#1e1b4b", bgBottom: "#090614",
-        glow: "rgba(236, 72, 153, 0.45)", rim: "rgba(168, 85, 247, 0.35)",
-        bokeh: "rgba(244, 114, 182, 0.14)",
-        podiumTop: "#7c3aed", podiumSide: "#2e1065",
-        badgeBg: "#ec4899", badgeText: "#ffffff",
-        titleColor: "#ffffff", subColor: "#e9d5ff",
-        pillBg: "rgba(15, 10, 30, 0.78)", pillBorder: "rgba(236, 72, 153, 0.75)", pillText: "#ffffff"
+      clean_light: {
+        bgTop: "#f3f4f6", bgMid: "#eaecf0", bgBottom: "#dfe2e7",
+        floorLine: "rgba(0,0,0,0.06)",
+        wordTop: "rgba(30, 32, 38, 0.58)", wordBot: "rgba(30, 32, 38, 0.06)",
+        ink: "#1c1e24", mutedInk: "#4b5563",
+        frameBorder: "rgba(28, 30, 36, 0.45)",
+        shadowColor: "rgba(15, 23, 42, 0.38)"
       },
-      dark_luxury: {
-        bgTop: "#222634", bgMid: "#11131a", bgBottom: "#050608",
-        glow: "rgba(245, 158, 11, 0.35)", rim: "rgba(251, 191, 36, 0.25)",
-        bokeh: "rgba(251, 191, 36, 0.12)",
-        podiumTop: "#3b4154", podiumSide: "#141720",
-        badgeBg: "#f59e0b", badgeText: "#090a0f",
-        titleColor: "#ffffff", subColor: "#cbd5e1",
-        pillBg: "rgba(10, 12, 18, 0.8)", pillBorder: "rgba(245, 158, 11, 0.65)", pillText: "#fef3c7"
+      dark_graphite: {
+        bgTop: "#24262d", bgMid: "#17191f", bgBottom: "#0e1014",
+        floorLine: "rgba(255,255,255,0.06)",
+        wordTop: "rgba(255, 255, 255, 0.45)", wordBot: "rgba(255, 255, 255, 0.04)",
+        ink: "#f8fafc", mutedInk: "#cbd5e1",
+        frameBorder: "rgba(248, 250, 252, 0.4)",
+        shadowColor: "rgba(0, 0, 0, 0.78)"
       },
-      tech_blue: {
-        bgTop: "#0c4a6e", bgMid: "#0f172a", bgBottom: "#020617",
-        glow: "rgba(56, 189, 248, 0.4)", rim: "rgba(14, 165, 233, 0.28)",
-        bokeh: "rgba(56, 189, 248, 0.14)",
-        podiumTop: "#1e293b", podiumSide: "#090d16",
-        badgeBg: "#38bdf8", badgeText: "#020617",
-        titleColor: "#f8fafc", subColor: "#bae6fd",
-        pillBg: "rgba(2, 6, 23, 0.8)", pillBorder: "rgba(56, 189, 248, 0.65)", pillText: "#e0f2fe"
+      warm_beige: {
+        bgTop: "#f6f2ea", bgMid: "#ede6d8", bgBottom: "#e0d6c3",
+        floorLine: "rgba(68, 56, 40, 0.08)",
+        wordTop: "rgba(66, 54, 38, 0.52)", wordBot: "rgba(66, 54, 38, 0.05)",
+        ink: "#292218", mutedInk: "#5c4f3d",
+        frameBorder: "rgba(41, 34, 24, 0.42)",
+        shadowColor: "rgba(41, 34, 24, 0.35)"
       },
-      eco_minimal: {
-        bgTop: "#f7f4ed", bgMid: "#eae4d5", bgBottom: "#d8ceb8",
-        glow: "rgba(132, 204, 22, 0.22)", rim: "rgba(255, 255, 255, 0.8)",
-        bokeh: "rgba(101, 163, 13, 0.1)",
-        podiumTop: "#cfc6b0", podiumSide: "#afa489",
-        badgeBg: "#3f6212", badgeText: "#ffffff",
-        titleColor: "#1c1917", subColor: "#44403c",
-        pillBg: "rgba(255, 255, 255, 0.9)", pillBorder: "rgba(63, 98, 18, 0.45)", pillText: "#1c1917"
-      },
-      sale_red: {
-        bgTop: "#881337", bgMid: "#18181b", bgBottom: "#070709",
-        glow: "rgba(244, 63, 94, 0.42)", rim: "rgba(251, 113, 133, 0.25)",
-        bokeh: "rgba(244, 63, 94, 0.14)",
-        podiumTop: "#27272a", podiumSide: "#09090b",
-        badgeBg: "#ef4444", badgeText: "#ffffff",
-        titleColor: "#ffffff", subColor: "#fecaca",
-        pillBg: "rgba(9, 9, 11, 0.82)", pillBorder: "rgba(239, 68, 68, 0.7)", pillText: "#ffffff"
-      },
-      mint_fresh: {
-        bgTop: "#115e59", bgMid: "#064e3b", bgBottom: "#02241c",
-        glow: "rgba(45, 212, 191, 0.38)", rim: "rgba(94, 234, 212, 0.25)",
-        bokeh: "rgba(45, 212, 191, 0.14)",
-        podiumTop: "#0f766e", podiumSide: "#042f2e",
-        badgeBg: "#2dd4bf", badgeText: "#042f2e",
-        titleColor: "#ffffff", subColor: "#ccfbf1",
-        pillBg: "rgba(2, 44, 34, 0.8)", pillBorder: "rgba(45, 212, 191, 0.65)", pillText: "#f0fdfa"
+      urban_cool: {
+        bgTop: "#e2e8f0", bgMid: "#cbd5e1", bgBottom: "#b4c0d0",
+        floorLine: "rgba(15, 23, 42, 0.08)",
+        wordTop: "rgba(15, 23, 42, 0.55)", wordBot: "rgba(15, 23, 42, 0.06)",
+        ink: "#0f172a", mutedInk: "#334155",
+        frameBorder: "rgba(15, 23, 42, 0.45)",
+        shadowColor: "rgba(15, 23, 42, 0.42)"
       }
     };
 
     const PRESETS = {
-      thermo: { theme: "dark_luxury", badge: "ХИТ ПРОДАЖ 2026", title: "ТЕРМОКРУЖКА PRO", sub: "Нержавеющая сталь • Вакуумная изоляция", b1: "🔥 Тепло до 12 ч", b2: "💧 100% герметична", b3: "🛡️ Гарантия 2 года • Подарочная коробка", desc: "Стильная термокружка PRO из пищевой нержавеющей стали с двойными стенками. Сохраняет напитки горячими до 12 часов, а холодными — до 24 часов. Герметичная крышка с защитой от протекания." },
-      tech: { theme: "tech_blue", badge: "НОВИНКА • ANC", title: "НАУШНИКИ PRO MAX", sub: "Активное шумоподавление • Bluetooth 5.4", b1: "🔋 До 36 ч работы", b2: "🎙️ 4 микрофона ENC", b3: "⚡ Быстрая зарядка Type-C за 15 минут", desc: "Беспроводные наушники PRO MAX с активным шумоподавлением ANC и чистым объемным звуком. До 36 часов автономной работы с кейсом, быстрая зарядка Type-C и 4 микрофона для четких звонков." },
-      cosmetic: { theme: "eco_minimal", badge: "100% ОРГАНИК", title: "СЫВОРОТКА ДЛЯ ЛИЦА", sub: "Гиалуроновая кислота + Витамин С", b1: "🌿 Без парабенов", b2: "💧 Глубокое увлажнение", b3: "✨ Видимый эффект уже через 7 дней", desc: "Увлажняющая сыворотка для лица с гиалуроновой кислотой и витамином С. Выравнивает тон кожи, глубоко питает и придает естественное сияние без липкости. Подходит для всех типов кожи." },
-      clothes: { theme: "wb_bright", badge: "ТРЕНД СЕЗОНА", title: "ХУДИ ОВЕРСАЙЗ", sub: "Плотный футер 3-нитка • 100% хлопок", b1: "🧶 Не скатывается", b2: "📐 Идеальная посадка", b3: "🚚 Доставка завтра • Все размеры в наличии", desc: "Базовое худи свободного кроя оверсайз из плотного премиального футера 3-нитки. Не вытягивается после стирки, не образует катышков и комфортно сидит на любой фигуре." }
+      sneakers_look: {
+        theme: "clean_light", layout: "grid_bottom",
+        bgWord: "УНИВЕРСАЛЬНОСТЬ", title: "КРОССОВКИ SUPERSTAR", sub: "НА КАЖДЫЙ ДЕНЬ",
+        i1: "jeans", l1: "ПОД ДЖИНСЫ",
+        i2: "dress", l2: "С ПЛАТЬЯМИ",
+        i3: "shorts", l3: "ПОД ШОРТЫ",
+        desc: "Классические кроссовки из износостойкой экокожи с фирменным мыском и анатомической поддержкой пятки. Универсальный силуэт легко сочетается с джинсами, платьями, шортами и повседневным гардеробом."
+      },
+      sneakers_detail: {
+        theme: "clean_light", layout: "callouts_arrows",
+        bgWord: "ЭКОЛОГИЧНОСТЬ", title: "КРОССОВКИ SUPERSTAR", sub: "УСТОЙЧИВЫЕ МАТЕРИАЛЫ",
+        i1: "eco", l1: "ИСКУССТВЕННАЯ КОЖА",
+        i2: "shield", l2: "ПОДДЕРЖКА ПЯТКИ",
+        i3: "check", l3: "ДЕТАЛИ ИМЕЮТ ЗНАЧЕНИЕ",
+        desc: "Модель выполнена из современных устойчивых материалов повышенной прочности. Усиленный задник с мягкой поддержкой пятки фиксирует стопу без натирания, а прошитая подошва гарантирует долгий срок службы."
+      },
+      cosmetic_clean: {
+        theme: "warm_beige", layout: "grid_bottom",
+        bgWord: "НАТУРАЛЬНОСТЬ", title: "СЫВОРОТКА HYALURON", sub: "ГЛУБОКОЕ УВЛАЖНЕНИЕ 24Ч",
+        i1: "eco", l1: "ОРГАНИК СОСТАВ",
+        i2: "water", l2: "ГИАЛУРОН 2%",
+        i3: "sparkle", l3: "РОВНЫЙ ТОН КОЖИ",
+        desc: "Концентрированная увлажняющая сыворотка с низкомолекулярной гиалуроновой кислотой и растительными экстрактами. Мгновенно устраняет сухость, выравнивает микрорельеф и возвращает коже естественное сияние."
+      },
+      tech_dark: {
+        theme: "dark_graphite", layout: "callouts_arrows",
+        bgWord: "ТЕХНОЛОГИЧНОСТЬ", title: "НАУШНИКИ STUDIO PRO", sub: "ЧИСТЫЙ ЗВУК БЕЗ ПРОВОДОВ",
+        i1: "battery", l1: "ДО 36 ЧАСОВ РАБОТЫ",
+        i2: "gear", l2: "ШУМОПОДАВЛЕНИЕ ANC",
+        i3: "feather", l3: "НЕВЕСОМАЯ ПОСАДКА",
+        desc: "Беспроводные наушники с системой активного шумоподавления ANC и студийной детализацией звука. До 36 часов автономной работы с зарядным кейсом и эргономичная форма для комфорта весь день."
+      }
     };
 
     function applyThemeById(themeId) {
       if (!THEMES[themeId]) return;
       currentTheme = themeId;
       document.querySelectorAll(".theme-card").forEach(c => c.classList.toggle("active", c.dataset.theme === themeId));
+    }
+
+    function applyLayoutById(layoutId) {
+      if (!["grid_bottom", "callouts_arrows"].includes(layoutId)) return;
+      currentLayout = layoutId;
+      document.querySelectorAll("#layoutTypeGroup .seg-btn").forEach(b => b.classList.toggle("active", b.dataset.layout === layoutId));
     }
 
     function updateCreditsUI() {
@@ -762,6 +902,49 @@
       }
     }
 
+    // Отрисовка векторной Line-Art иконки в заданном квадрате
+    function drawVectorIcon(iconKey, centerX, centerY, size, color) {
+      const icon = VECTOR_ICONS[iconKey] || VECTOR_ICONS.check;
+      const scale = size / 64;
+      ctx.save();
+      ctx.translate(centerX - size / 2, centerY - size / 2);
+      ctx.scale(scale, scale);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.6;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      icon.paths.forEach(d => {
+        const p = new Path2D(d);
+        ctx.stroke(p);
+      });
+      ctx.restore();
+    }
+
+    // Рисование изогнутой стрелки-выноски (как на первом референсе)
+    function drawCurvedArrow(fromX, fromY, cpX, cpY, toX, toY, color) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.quadraticCurveTo(cpX, cpY, toX, toY);
+      ctx.stroke();
+
+      // Наконечник стрелки по касательной к концу кривой
+      const angle = Math.atan2(toY - cpY, toX - cpX);
+      const headLen = 13;
+      ctx.beginPath();
+      ctx.moveTo(toX, toY);
+      ctx.lineTo(toX - headLen * Math.cos(angle - Math.PI / 6), toY - headLen * Math.sin(angle - Math.PI / 6));
+      ctx.moveTo(toX, toY);
+      ctx.lineTo(toX - headLen * Math.cos(angle + Math.PI / 6), toY - headLen * Math.sin(angle + Math.PI / 6));
+      ctx.stroke();
+      ctx.restore();
+    }
+
     function roundRect(ctx, x, y, w, h, r) {
       ctx.beginPath();
       ctx.moveTo(x + r, y);
@@ -772,187 +955,208 @@
       ctx.closePath();
     }
 
-    function seededRand(seed) {
-      let x = Math.sin(seed++) * 10000;
-      return x - Math.floor(x);
-    }
-
     function drawCard() {
       const t = THEMES[currentTheme];
       const W = canvas.width;
       const H = canvas.height;
 
+      // 1. Чистая студийная циклорама
       const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
       bgGrad.addColorStop(0, t.bgTop);
-      bgGrad.addColorStop(0.55, t.bgMid);
+      bgGrad.addColorStop(0.68, t.bgMid);
       bgGrad.addColorStop(1, t.bgBottom);
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, W, H);
 
-      ctx.save();
-      for (let i = 0; i < 14; i++) {
-        const bx = seededRand(bokehSeed * 10 + i) * W;
-        const by = 220 + seededRand(bokehSeed * 20 + i) * (H - 350);
-        const br = 35 + seededRand(bokehSeed * 30 + i) * 110;
-        const bGrad = ctx.createRadialGradient(bx, by, 0, bx, by, br);
-        bGrad.addColorStop(0, t.bokeh);
-        bGrad.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = bGrad;
-        ctx.beginPath();
-        ctx.arc(bx, by, br, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
+      // Мягкий горизонт пола циклорамы
+      const floorGrad = ctx.createLinearGradient(0, 720, 0, 860);
+      floorGrad.addColorStop(0, "rgba(0,0,0,0)");
+      floorGrad.addColorStop(0.5, t.floorLine);
+      floorGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = floorGrad;
+      ctx.fillRect(0, 720, W, 140);
 
-      const radGrad = ctx.createRadialGradient(W / 2, H * 0.56, 30, W / 2, H * 0.56, 480);
-      radGrad.addColorStop(0, t.glow);
-      radGrad.addColorStop(0.55, t.rim);
-      radGrad.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = radGrad;
-      ctx.fillRect(0, 0, W, H);
-
-      const podY = 935;
-      if (podiumStyle === "disc") {
+      // 2. Гигантская фоновая типографика (УНИВЕРСАЛЬНОСТЬ / ЭКОЛОГИЧНОСТЬ)
+      const bgWord = document.getElementById("bgWordInput").value.trim().toUpperCase();
+      if (bgWord) {
         ctx.save();
-        ctx.fillStyle = t.podiumSide;
-        ctx.beginPath();
-        ctx.ellipse(W / 2, podY + 36, 300, 60, 0, 0, Math.PI * 2);
-        ctx.fill();
+        // Автоподбор кегля под ширину холста
+        let fontSize = 112;
+        ctx.font = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        const measured = ctx.measureText(bgWord).width;
+        if (measured > W - 70) {
+          fontSize = Math.floor(fontSize * ((W - 70) / measured));
+          ctx.font = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        }
 
-        const podGrad = ctx.createLinearGradient(W / 2 - 300, podY, W / 2 + 300, podY);
-        podGrad.addColorStop(0, t.podiumSide);
-        podGrad.addColorStop(0.5, t.podiumTop);
-        podGrad.addColorStop(1, t.podiumSide);
-        ctx.fillStyle = podGrad;
-        ctx.beginPath();
-        ctx.ellipse(W / 2, podY, 300, 60, 0, 0, Math.PI * 2);
-        ctx.fill();
+        const textY = 64;
+        const wordGrad = ctx.createLinearGradient(0, textY, 0, textY + fontSize * 1.15);
+        wordGrad.addColorStop(0, t.wordTop);
+        wordGrad.addColorStop(1, t.wordBot);
 
-        ctx.strokeStyle = "rgba(255,255,255,0.22)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.ellipse(W / 2, podY, 298, 58, 0, Math.PI, Math.PI * 2);
-        ctx.stroke();
-
-        const shadowGrad = ctx.createRadialGradient(W / 2, podY, 10, W / 2, podY, 195);
-        shadowGrad.addColorStop(0, "rgba(0,0,0,0.65)");
-        shadowGrad.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = shadowGrad;
-        ctx.beginPath();
-        ctx.ellipse(W / 2, podY, 195, 34, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      } else if (podiumStyle === "shadow") {
-        ctx.save();
-        const floatShadow = ctx.createRadialGradient(W / 2, podY + 15, 15, W / 2, podY + 15, 240);
-        floatShadow.addColorStop(0, "rgba(0,0,0,0.68)");
-        floatShadow.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = floatShadow;
-        ctx.beginPath();
-        ctx.ellipse(W / 2, podY + 15, 240, 38, 0, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = wordGrad;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillText(bgWord, W / 2, textY);
         ctx.restore();
       }
 
+      // 3. Реалистичная контактная тень под парящим товаром
+      const shadowIntensity = Number(document.getElementById("shadowRange").value) / 100;
       const scale = parseFloat(document.getElementById("scaleRange").value);
       const offsetX = parseFloat(document.getElementById("posXRange").value);
       const offsetY = parseFloat(document.getElementById("posYRange").value);
 
+      if (shadowIntensity > 0) {
+        ctx.save();
+        ctx.globalAlpha = shadowIntensity;
+        const shX = W / 2 + offsetX;
+        const shY = 795 + offsetY * 0.4;
+        const shW = 290 * scale;
+        const shH = 34 * scale;
+
+        const shGrad = ctx.createRadialGradient(shX, shY, 10, shX, shY, shW);
+        shGrad.addColorStop(0, t.shadowColor);
+        shGrad.addColorStop(0.6, "rgba(0,0,0,0.12)");
+        shGrad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = shGrad;
+        ctx.beginPath();
+        ctx.ellipse(shX, shY, shW, shH, -0.04, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 4. Вырезанный товар
       if (productImg) {
-        const maxDim = 570 * scale;
+        const maxDim = 610 * scale;
         const ratio = Math.min(maxDim / productImg.width, maxDim / productImg.height);
         const drawW = productImg.width * ratio;
         const drawH = productImg.height * ratio;
         const drawX = (W - drawW) / 2 + offsetX;
-        const drawY = (H * 0.54 - drawH / 2) + offsetY;
+        const drawY = (H * 0.46 - drawH / 2) + offsetY;
 
         ctx.save();
-        ctx.shadowColor = "rgba(0,0,0,0.55)";
-        ctx.shadowBlur = 40;
-        ctx.shadowOffsetY = 22;
         ctx.drawImage(productImg, drawX, drawY, drawW, drawH);
         ctx.restore();
       } else {
         ctx.save();
-        ctx.strokeStyle = t.pillBorder;
-        ctx.lineWidth = 3;
-        ctx.setLineDash([14, 10]);
-        roundRect(ctx, W / 2 - 165, 440, 330, 390, 30);
+        ctx.strokeStyle = t.frameBorder;
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([12, 10]);
+        roundRect(ctx, W / 2 - 175, 310, 350, 410, 24);
         ctx.stroke();
 
-        ctx.fillStyle = t.titleColor;
-        ctx.font = "800 24px sans-serif";
+        ctx.fillStyle = t.ink;
+        ctx.font = "700 23px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("МЕСТО ДЛЯ ТОВАРА", W / 2, 620);
+        ctx.fillText("МЕСТО ДЛЯ ТОВАРА", W / 2, 500);
 
-        ctx.fillStyle = t.subColor;
-        ctx.font = "500 18px sans-serif";
-        ctx.fillText("Загрузите фото во вкладке «Товар»", W / 2, 656);
+        ctx.fillStyle = t.mutedInk;
+        ctx.font = "500 17px sans-serif";
+        ctx.fillText("Загрузите фото во вкладке «Товар»", W / 2, 535);
         ctx.restore();
       }
 
-      const badgeText = document.getElementById("badgeInput").value.trim();
-      if (badgeText) {
-        ctx.font = "800 22px sans-serif";
-        const bw = ctx.measureText(badgeText).width + 52;
-        const bx = (W - bw) / 2;
-        roundRect(ctx, bx, 52, bw, 48, 24);
-        ctx.fillStyle = t.badgeBg;
-        ctx.fill();
+      // Получаем значения 3 блоков инфографики
+      const icon1 = document.getElementById("icon1Select").value;
+      const label1 = document.getElementById("label1Input").value.trim().toUpperCase();
+      const icon2 = document.getElementById("icon2Select").value;
+      const label2 = document.getElementById("label2Input").value.trim().toUpperCase();
+      const icon3 = document.getElementById("icon3Select").value;
+      const label3 = document.getElementById("label3Input").value.trim().toUpperCase();
+      const subText = document.getElementById("subInput").value.trim().toUpperCase();
 
-        ctx.fillStyle = t.badgeText;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(badgeText, W / 2, 76);
-      }
+      // 5. МАКЕТ А: Нижняя модульная сетка иконок в рамке-скобке (как на 2-м референсе)
+      if (currentLayout === "grid_bottom") {
+        const iconY = 955;
+        const textY = 1042;
+        const cols = [210, 450, 690];
 
-      const title = document.getElementById("titleInput").value.trim();
-      ctx.fillStyle = t.titleColor;
-      ctx.font = "900 62px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ctx.fillText(title, W / 2, 124, W - 80);
+        // Иконки
+        drawVectorIcon(icon1, cols[0], iconY, 84, t.ink);
+        drawVectorIcon(icon2, cols[1], iconY, 84, t.ink);
+        drawVectorIcon(icon3, cols[2], iconY, 84, t.ink);
 
-      const sub = document.getElementById("subInput").value.trim();
-      ctx.fillStyle = t.subColor;
-      ctx.font = "600 27px sans-serif";
-      ctx.fillText(sub, W / 2, 202, W - 90);
-
-      const b1 = document.getElementById("b1Input").value.trim();
-      const b2 = document.getElementById("b2Input").value.trim();
-      const b3 = document.getElementById("b3Input").value.trim();
-
-      function drawPill(text, x, y, w, h) {
-        if (!text) return;
+        // Горизонтальные разделительные линии между иконками
         ctx.save();
-        roundRect(ctx, x, y, w, h, 22);
-        ctx.fillStyle = t.pillBg;
-        ctx.fill();
+        ctx.strokeStyle = t.frameBorder;
         ctx.lineWidth = 2;
-        ctx.strokeStyle = t.pillBorder;
+        ctx.beginPath();
+        ctx.moveTo(275, iconY + 12);
+        ctx.lineTo(385, iconY + 12);
+        ctx.moveTo(515, iconY + 12);
+        ctx.lineTo(625, iconY + 12);
         ctx.stroke();
 
-        ctx.fillStyle = t.pillText;
-        ctx.font = "700 26px sans-serif";
+        // Тонкая нижняя рамка-скобка, охватывающая все 3 пункта
+        const boxLeft = 75, boxRight = W - 75, boxTop = iconY + 12, boxBot = 1118, r = 24;
+        ctx.beginPath();
+        ctx.moveTo(135, boxTop);
+        ctx.lineTo(boxLeft + r, boxTop);
+        ctx.arcTo(boxLeft, boxTop, boxLeft, boxTop + r, r);
+        ctx.lineTo(boxLeft, boxBot - r);
+        ctx.arcTo(boxLeft, boxBot, boxLeft + r, boxBot, r);
+        ctx.lineTo(boxRight - r, boxBot);
+        ctx.arcTo(boxRight, boxBot, boxRight, boxBot - r, r);
+        ctx.lineTo(boxRight, boxTop + r);
+        ctx.arcTo(boxRight, boxTop, boxRight - r, boxTop, r);
+        ctx.lineTo(boxRight - 60, boxTop);
+        ctx.stroke();
+
+        // Подписи под иконками
+        ctx.fillStyle = t.ink;
+        ctx.font = "600 23px -apple-system, BlinkMacSystemFont, sans-serif";
         ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(text, x + w / 2, y + h / 2, w - 32);
+        ctx.textBaseline = "top";
+        ctx.fillText(label1, cols[0], textY, 210);
+        ctx.fillText(label2, cols[1], textY, 210);
+        ctx.fillText(label3, cols[2], textY, 210);
         ctx.restore();
       }
 
-      drawPill(b1, 56, 270, 380, 70);
-      drawPill(b2, 464, 270, 380, 70);
-      drawPill(b3, 56, 1056, 788, 76);
+      // 6. МАКЕТ Б: Выноски со стрелками + нижний акцентный слоган (как на 1-м референсе)
+      if (currentLayout === "callouts_arrows") {
+        ctx.save();
+        ctx.fillStyle = t.ink;
+        ctx.textAlign = "center";
 
+        // Правая верхняя выноска с иконкой и изогнутой стрелкой к товару
+        drawVectorIcon(icon1, 755, 295, 68, t.ink);
+        ctx.font = "600 20px sans-serif";
+        ctx.fillText(label1, 755, 355, 210);
+        drawCurvedArrow(690, 290, 645, 275, 600, 315, t.ink);
+
+        // Нижняя левая выноска со стрелкой к нижней части товара
+        if (label2) {
+          ctx.font = "600 21px sans-serif";
+          ctx.textAlign = "left";
+          ctx.fillText(label2, 76, 855, 360);
+          drawCurvedArrow(220, 830, 225, 765, 285, 735, t.ink);
+        }
+
+        // Нижний крупный слоган и подпись (УСТОЙЧИВЫЕ МАТЕРИАЛЫ / ДЕТАЛИ ИМЕЮТ ЗНАЧЕНИЕ)
+        ctx.textAlign = "left";
+        ctx.font = "700 38px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillText(subText || label3, 76, 985, W - 152);
+
+        if (label3 && subText && label3 !== subText) {
+          ctx.fillStyle = t.mutedInk;
+          ctx.font = "500 24px sans-serif";
+          ctx.fillText(label3, 76, 1045, W - 152);
+        }
+        ctx.restore();
+      }
+
+      // 7. Водяной знак (только если нет HD-кредитов)
       if (credits <= 0) {
         ctx.save();
         ctx.translate(W / 2, H / 2);
         ctx.rotate(-Math.PI / 6);
-        ctx.font = "900 48px sans-serif";
-        ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
+        ctx.font = "900 44px sans-serif";
+        ctx.fillStyle = currentTheme === "dark_graphite" ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.11)";
         ctx.textAlign = "center";
-        ctx.fillText("MP DESIGN STUDIO", 0, -34);
-        ctx.fillText("DEMO PREVIEW", 0, 34);
+        ctx.fillText("MP DESIGN STUDIO", 0, -30);
+        ctx.fillText("DEMO PREVIEW", 0, 30);
         ctx.restore();
       }
     }
@@ -1024,11 +1228,9 @@
       });
     });
 
-    document.querySelectorAll("#podiumTypeGroup .seg-btn").forEach(btn => {
+    document.querySelectorAll("#layoutTypeGroup .seg-btn").forEach(btn => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll("#podiumTypeGroup .seg-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        podiumStyle = btn.dataset.podium;
+        applyLayoutById(btn.dataset.layout);
         drawCard();
       });
     });
@@ -1138,7 +1340,6 @@
       cleanImg.src = tempCanvas.toDataURL("image/png");
     }
 
-    // БЕЗЛИМИТНАЯ НЕЙРОСЕТЕВАЯ ВЫРЕЗКА ЛЮБОГО СЛОЖНОГО ФОНА В БРАУЗЕРЕ
     async function smartNeuralCutout(img, rawFile) {
       statusBox.style.display = "block";
       statusBox.textContent = "✂️ Нейросеть вырезает товар со сложного фона (первый запуск ~5 сек)...";
@@ -1159,7 +1360,7 @@
           cleanImg.onload = () => {
             productImg = cleanImg;
             document.getElementById("toleranceBox").style.display = "none";
-            statusBox.textContent = "✅ Фон чисто удален нейросетью! Товар размещен на подиуме.";
+            statusBox.textContent = "✅ Фон чисто удален нейросетью! Товар размещен в студии.";
             drawCard();
           };
           cleanImg.src = url;
@@ -1188,55 +1389,43 @@
 
     function applyAiContent(parsed) {
       if (parsed.theme) applyThemeById(parsed.theme);
-      if (parsed.badge) document.getElementById("badgeInput").value = parsed.badge;
+      if (parsed.layout) applyLayoutById(parsed.layout);
+      if (parsed.bgWord) document.getElementById("bgWordInput").value = parsed.bgWord;
       if (parsed.title) document.getElementById("titleInput").value = parsed.title;
       if (parsed.sub) document.getElementById("subInput").value = parsed.sub;
-      if (parsed.b1) document.getElementById("b1Input").value = parsed.b1;
-      if (parsed.b2) document.getElementById("b2Input").value = parsed.b2;
-      if (parsed.b3) document.getElementById("b3Input").value = parsed.b3;
+
+      if (Array.isArray(parsed.items)) {
+        if (parsed.items[0]) {
+          if (VECTOR_ICONS[parsed.items[0].icon]) document.getElementById("icon1Select").value = parsed.items[0].icon;
+          if (parsed.items[0].label) document.getElementById("label1Input").value = parsed.items[0].label;
+        }
+        if (parsed.items[1]) {
+          if (VECTOR_ICONS[parsed.items[1].icon]) document.getElementById("icon2Select").value = parsed.items[1].icon;
+          if (parsed.items[1].label) document.getElementById("label2Input").value = parsed.items[1].label;
+        }
+        if (parsed.items[2]) {
+          if (VECTOR_ICONS[parsed.items[2].icon]) document.getElementById("icon3Select").value = parsed.items[2].icon;
+          if (parsed.items[2].label) document.getElementById("label3Input").value = parsed.items[2].label;
+        }
+      }
       if (parsed.description) document.getElementById("seoDescInput").value = parsed.description;
       drawCard();
     }
 
     function buildSmartFallbackContent(rawName) {
       const q = (rawName || "Товар").toLowerCase();
-      if (q.match(/кроссов|кед|обув|ботин|туфл|сапог/)) {
-        return {
-          theme: "tech_blue", badge: "ТРЕНД СЕЗОНА 2026", title: rawName.toUpperCase().slice(0, 22),
-          sub: "Анатомическая стелька • Дышащий верх", b1: "👟 Амортизация Air", b2: "🌬️ Дышащая сетка",
-          b3: "🛡️ Износостойкая подошва • Идеальная посадка",
-          description: `${rawName} — стильная и удобная модель на каждый день и для спорта. Легкая амортизирующая подошва снижает нагрузку на стопу, а дышащие материалы обеспечивают комфорт в любую погоду.`
-        };
-      }
-      if (q.match(/крем|сыворот|маск|шампун|гель|космет|парфюм|духи|помад/)) {
-        return {
-          theme: "eco_minimal", badge: "100% НАТУРАЛЬНЫЙ СОСТАВ", title: rawName.toUpperCase().slice(0, 22),
-          sub: "Глубокое питание • Без парабенов", b1: "🌿 Эко-формула", b2: "💧 Увлажнение 24ч",
-          b3: "✨ Видимый результат с первого применения",
-          description: `${rawName} — профессиональный уход с активными натуральными компонентами. Глубоко увлажняет, восстанавливает и придает здоровое сияние без ощущения липкости.`
-        };
-      }
-      if (q.match(/наушник|часы|смарт|заряд|кабел|колонк|телефон|чехол|мыш|клавиатур/)) {
-        return {
-          theme: "tech_blue", badge: "НОВИНКА • ХИТ 2026", title: rawName.toUpperCase().slice(0, 22),
-          sub: "Высокая скорость • Защита от перегрева", b1: "⚡ Быстрый отклик", b2: "🔋 Долгий заряд",
-          b3: "🛡️ Официальная гарантия 12 месяцев",
-          description: `${rawName} — надежный современный гаджет с продуманной эргономикой и высокой производительностью. Стабильная работа без задержек и полная совместимость с iOS, Android и ПК.`
-        };
-      }
-      if (q.match(/худи|футболк|плать|костюм|брюк|джинс|куртк|шапк|одежд|свитшот/)) {
-        return {
-          theme: "wb_bright", badge: "ХИТ ПРОДАЖ WB", title: rawName.toUpperCase().slice(0, 22),
-          sub: "Премиальный хлопок • Не скатывается", b1: "🧶 Плотность 320 г", b2: "📐 Идеальный крой",
-          b3: "🚚 Все размеры в наличии • Быстрая доставка",
-          description: `${rawName} — базовая модель из плотного дышащего материала премиум-качества. Не вытягивается и не теряет цвет после множества стирок, комфортно садится по фигуре.`
-        };
-      }
+      if (q.match(/кроссов|кед|обув|ботин|туфл|сапог/)) return PRESETS.sneakers_look;
+      if (q.match(/крем|сыворот|маск|шампун|гель|космет|парфюм|духи/)) return PRESETS.cosmetic_clean;
+      if (q.match(/наушник|часы|смарт|заряд|кабел|колонк|телефон|чехол|мыш/)) return PRESETS.tech_dark;
       return {
-        theme: "dark_luxury", badge: "ВЫБОР ПОКУПАТЕЛЕЙ", title: rawName.toUpperCase().slice(0, 22),
-        sub: "Премиальное качество • Проверено временем", b1: "⭐ Рейтинг 5.0", b2: "💎 Топ качество",
-        b3: "🛡️ Гарантия возврата • Надежная упаковка",
-        description: `${rawName} — практичное и надежное решение для ежедневного использования. Изготовлено из износостойких безопасных материалов с контролем качества на каждом этапе.`
+        theme: "clean_light", layout: "grid_bottom",
+        bgWord: "ПРЕМИАЛЬНОСТЬ", title: rawName.toUpperCase().slice(0, 22), sub: "ДЕТАЛИ ИМЕЮТ ЗНАЧЕНИЕ",
+        items: [
+          { icon: "shield", label: "ВЫСОКАЯ ПРОЧНОСТЬ" },
+          { icon: "eco", label: "ЭКО МАТЕРИАЛЫ" },
+          { icon: "check", label: "ГАРАНТИЯ КАЧЕСТВА" }
+        ],
+        description: `${rawName} — лаконичное и продуманное решение для ежедневного использования. Изготовлено из износостойких материалов с контролем качества каждой детали. Поставляется в фирменной упаковке.`
       };
     }
 
@@ -1245,7 +1434,7 @@
       document.getElementById("generateAiTextBtn").disabled = true;
       const aiTextStatus = document.getElementById("aiTextStatus");
       aiTextStatus.style.display = "block";
-      aiTextStatus.textContent = "🧠 Gemini AI подбирает иконки, плашки и SEO-описание...";
+      aiTextStatus.textContent = "🧠 Арт-директор Gemini подбирает стиль, векторные иконки и описание...";
 
       const titleVal = document.getElementById("titleInput").value.trim();
       const payload = {
@@ -1267,18 +1456,18 @@
         }
 
         applyAiContent(result.data);
-        aiTextStatus.textContent = `✅ Готово (${result.model || "Gemini AI"}): иконки, плашки и SEO-описание заполнены!`;
+        aiTextStatus.textContent = `✅ Готово (${result.model || "Gemini AI"}): стиль, векторные иконки и SEO-описание обновлены!`;
       } catch (err) {
-        const fallback = buildSmartFallbackContent(titleVal || "Товар для маркетплейса");
+        const fallback = buildSmartFallbackContent(titleVal || "Товар");
         applyAiContent(fallback);
-        aiTextStatus.textContent = `✅ Иконки, плашки и SEO-описание заполнены! (${err.message})`;
+        aiTextStatus.textContent = `✅ Применен журнальный стиль и векторные иконки (${err.message})`;
       } finally {
         if (originalImg) analyzePhotoBtn.disabled = false;
         document.getElementById("generateAiTextBtn").disabled = false;
       }
     }
 
-    fileInput.addEventListener("change", async (e) => {
+    fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
       originalFile = file;
@@ -1287,7 +1476,7 @@
       const reader = new FileReader();
       reader.onload = (ev) => {
         const img = new Image();
-        img.onload = async () => {
+        img.onload = () => {
           originalImg = img;
           productImg = img;
           analyzePhotoBtn.disabled = false;
@@ -1319,11 +1508,6 @@
       runAdaptiveCutout();
     });
 
-    document.getElementById("generateAiBgBtn").addEventListener("click", () => {
-      bokehSeed = Math.floor(Math.random() * 1000) + 1;
-      drawCard();
-    });
-
     document.getElementById("generateAiTextBtn").addEventListener("click", () => {
       callGeminiAI(Boolean(originalImg));
     });
@@ -1342,9 +1526,9 @@
     });
 
     document.getElementById("resetPosBtn").addEventListener("click", () => {
-      document.getElementById("scaleRange").value = 0.85;
+      document.getElementById("scaleRange").value = 0.95;
       document.getElementById("posXRange").value = 0;
-      document.getElementById("posYRange").value = 55;
+      document.getElementById("posYRange").value = -10;
       updateSliderLabels();
       drawCard();
     });
@@ -1353,18 +1537,23 @@
       document.getElementById("scaleVal").textContent = Math.round(document.getElementById("scaleRange").value * 100) + "%";
       document.getElementById("posXVal").textContent = document.getElementById("posXRange").value;
       document.getElementById("posYVal").textContent = document.getElementById("posYRange").value;
+      document.getElementById("shadowVal").textContent = document.getElementById("shadowRange").value + "%";
     }
 
     document.querySelectorAll(".chip").forEach(btn => {
       btn.addEventListener("click", () => {
         const p = PRESETS[btn.dataset.preset];
         applyThemeById(p.theme);
-        document.getElementById("badgeInput").value = p.badge;
+        applyLayoutById(p.layout);
+        document.getElementById("bgWordInput").value = p.bgWord;
         document.getElementById("titleInput").value = p.title;
         document.getElementById("subInput").value = p.sub;
-        document.getElementById("b1Input").value = p.b1;
-        document.getElementById("b2Input").value = p.b2;
-        document.getElementById("b3Input").value = p.b3;
+        document.getElementById("icon1Select").value = p.i1;
+        document.getElementById("label1Input").value = p.l1;
+        document.getElementById("icon2Select").value = p.i2;
+        document.getElementById("label2Input").value = p.l2;
+        document.getElementById("icon3Select").value = p.i3;
+        document.getElementById("label3Input").value = p.l3;
         document.getElementById("seoDescInput").value = p.desc;
         drawCard();
       });
@@ -1444,12 +1633,13 @@
       }
     });
 
-    ["badgeInput", "titleInput", "subInput", "b1Input", "b2Input", "b3Input", "scaleRange", "posXRange", "posYRange"]
+    ["bgWordInput", "titleInput", "subInput", "label1Input", "label2Input", "label3Input", "scaleRange", "posXRange", "posYRange", "shadowRange"]
       .forEach(id => document.getElementById(id).addEventListener("input", () => {
         updateSliderLabels();
         drawCard();
       }));
 
+    populateIconSelects();
     updateCreditsUI();
     updateSliderLabels();
     drawCard();
