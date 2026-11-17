@@ -1,4 +1,4 @@
-const BOT_TOKEN = "9263036364:AAFQuaLsD28HEULbDgHwoKN_rXbILfzpbcA";
+const BOT_TOKEN = "9263036364:AAHNAVNpYxImmaGBqKVz0x0rsbILDBAJMrY";
 
 export async function handler(event) {
   const headers = {
@@ -31,7 +31,7 @@ export async function handler(event) {
     return { statusCode: 200, headers, body: JSON.stringify(data) };
   }
 
-  // 2. Webhook от Telegram: подтверждение оплаты
+  // 2. Webhook от Telegram: автоматическое подтверждение оплаты
   if (event.httpMethod === "POST") {
     const update = JSON.parse(event.body || "{}");
     if (update?.pre_checkout_query) {
