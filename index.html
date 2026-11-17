@@ -685,14 +685,12 @@
     const verdictBox = document.getElementById("verdictBox");
 
     let originalImg = null;
-    let originalFile = null;
     let productImg = null;
     let currentTheme = "clean_light";
     let currentLayout = "grid_bottom";
     let activeVariantIndex = 0;
     let cachedRemoveBgFn = null;
 
-    // Динамическая загрузка нейросети вырезки фона с гарантированным ожиданием
     async function getNeuralBgRemover() {
       if (cachedRemoveBgFn) return cachedRemoveBgFn;
       const mod = await import("https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm");
@@ -1139,7 +1137,7 @@
         ctx.lineTo(boxLeft, boxBot - r);
         ctx.arcTo(boxLeft, boxBot, boxLeft + r, boxBot, r);
         ctx.lineTo(boxRight - r, boxBot);
-        ctx.arcTo(boxRight, boxBot, boxRight, boxBot - r, r);
+        ctx.arcTo(boxRight, boxBot, boxRight, boxRight - r, r);
         ctx.lineTo(boxRight, boxTop + r);
         ctx.arcTo(boxRight, boxTop, boxRight - r, boxTop, r);
         ctx.lineTo(boxRight - 60, boxTop);
@@ -1311,9 +1309,9 @@
       });
     });
 
-    // ГАРАНТИРОВАННОЕ УДАЛЕНИЕ ФОНА С ОЖИДАНИЕМ ЗАГРУЗКИ МОДУЛЯ
-    async function smartNeuralCutout(rawFile) {
-      if (!rawFile) return;
+    // ИСПРАВЛЕННЫЙ МОДУЛЬ ВЫРЕЗКИ ФОНА (с перекодированием через canvas для устранения ошибок декодирования)
+    async function smartNeuralCutout(imgElement) {
+      if (!imgElement) return;
       cutoutAgainBtn.disabled = true;
       statusBox.style.display = "block";
       statusBox.textContent = "⏳ Загружаем нейросеть удаления фона...";
@@ -1322,7 +1320,18 @@
         const removeBg = await getNeuralBgRemover();
         statusBox.textContent = "✂️ Нейросеть вырезает товар с фона...";
 
-        const resultBlob = await removeBg(rawFile, {
+        const prepCanvas = document.createElement("canvas");
+        const maxSide = 1200;
+        const w = imgElement.naturalWidth || imgElement.width;
+        const h = imgElement.naturalHeight || imgElement.height;
+        const ratio = Math.min(1, maxSide / Math.max(w, h));
+        prepCanvas.width = Math.round(w * ratio);
+        prepCanvas.height = Math.round(h * ratio);
+        prepCanvas.getContext("2d").drawImage(imgElement, 0, 0, prepCanvas.width, prepCanvas.height);
+
+        const cleanInputBlob = await new Promise((resolve) => prepCanvas.toBlob(resolve, "image/png"));
+
+        const resultBlob = await removeBg(cleanInputBlob, {
           progress: (key, current, total) => {
             if (total > 0) {
               const pct = Math.round((current / total) * 100);
@@ -1416,8 +1425,6 @@
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      originalFile = file;
-      document.getElementById("uploadLabelText").textContent = "✅ Фото: " + file.name;
 
       const reader = new FileReader();
       reader.onload = (ev) => {
@@ -1425,10 +1432,11 @@
         img.onload = () => {
           originalImg = img;
           productImg = img;
+          document.getElementById("uploadLabelText").textContent = "✅ Фото загружено";
           cutoutAgainBtn.disabled = false;
           restoreBgBtn.disabled = false;
           drawCard();
-          smartNeuralCutout(file);
+          smartNeuralCutout(img);
           callGeminiAI(true);
         };
         img.src = ev.target.result;
@@ -1437,7 +1445,7 @@
     });
 
     cutoutAgainBtn.addEventListener("click", () => {
-      if (originalFile) smartNeuralCutout(originalFile);
+      if (originalImg) smartNeuralCutout(originalImg);
     });
 
     restoreBgBtn.addEventListener("click", () => {
