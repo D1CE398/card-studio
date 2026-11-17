@@ -289,7 +289,7 @@
     }
     textarea {
       resize: vertical;
-      min-height: 92px;
+      min-height: 105px;
       line-height: 1.45;
     }
     input[type="text"]:focus, textarea:focus { border-color: #8b5cf6; }
@@ -311,7 +311,7 @@
     }
 
     .btn-demo {
-      width: 46px;
+      width: 48px;
       flex-shrink: 0;
       background: var(--surface-2);
       border: 1px solid var(--border);
@@ -405,8 +405,8 @@
     }
     .save-modal.open { display: flex; }
     .save-modal img {
-      max-height: 62vh;
-      max-width: 90vw;
+      max-height: 58vh;
+      max-width: 88vw;
       border-radius: 12px;
       box-shadow: 0 12px 40px rgba(0,0,0,0.8);
       border: 1px solid rgba(255,255,255,0.15);
@@ -448,21 +448,21 @@
       <div class="card-box">
         <div class="section-label">
           <span>Фотография товара</span>
-          <span style="color:#a78bfa;">Vision AI + Вырезка</span>
+          <span style="color:#a78bfa;">Gemini Vision AI</span>
         </div>
         <label class="upload-zone" for="fileInput">
           <input type="file" id="fileInput" accept="image/*" />
           <div style="font-size:22px; margin-bottom:4px;">📷</div>
           <div style="font-weight:700; font-size:13px;" id="uploadLabelText">Загрузить фото из галереи</div>
-          <div style="font-size:11px; color:var(--muted); margin-top:2px;">ИИ сам определит товар, вырежет фон и заполнит карточку</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Gemini сам распознает товар, подберет иконки и вырежет фон</div>
         </label>
         <div class="grid-2">
-          <button class="btn btn-ai" id="analyzePhotoBtn" type="button" disabled>🧠 Распознать заново</button>
+          <button class="btn btn-ai" id="analyzePhotoBtn" type="button" disabled>🧠 Распознать по фото</button>
           <button class="btn btn-ghost" id="restoreBgBtn" type="button" disabled>↩️ Исходное фото</button>
         </div>
         <div class="slider-item" id="toleranceBox" style="display:none;">
-          <div class="slider-head"><span>Точность обрезки контура</span><span id="tolVal">36</span></div>
-          <input type="range" id="tolRange" min="10" max="95" step="2" value="36" />
+          <div class="slider-head"><span>Сила захвата фона</span><span id="tolVal">65</span></div>
+          <input type="range" id="tolRange" min="15" max="140" step="3" value="65" />
         </div>
         <div class="ai-status" id="statusBox"></div>
       </div>
@@ -537,12 +537,12 @@
     <!-- Вкладка 3: AI-Тексты, иконки и SEO-описание -->
     <div class="tab-pane" id="tabText">
       <div class="card-box">
-        <div class="section-label">Нейро-копирайтер и подбор иконок</div>
+        <div class="section-label">Нейро-копирайтер Gemini</div>
         <div class="field">
-          <span>Название товара (определяется по фото или вводится вручную)</span>
+          <span>Название товара (определяется по фото или редактируется вручную)</span>
           <input type="text" id="titleInput" value="ТЕРМОКРУЖКА PRO" />
         </div>
-        <button class="btn btn-ai" id="generateAiTextBtn" type="button">✨ Сгенерировать иконки, плашки и описание</button>
+        <button class="btn btn-ai" id="generateAiTextBtn" type="button">✨ Придумать иконки, плашки и SEO-описание</button>
         <div class="ai-status" id="aiTextStatus"></div>
 
         <div class="presets-scroll" style="margin-top:4px;">
@@ -569,14 +569,14 @@
           <span>SEO-описание для карточки WB / Ozon</span>
           <span id="copyDescBtn" style="color:#38bdf8; cursor:pointer; text-transform:none;">📋 Скопировать</span>
         </div>
-        <textarea id="seoDescInput" placeholder="Здесь появится готовое продающее описание товара для маркетплейса...">Стильная термокружка PRO из пищевой нержавеющей стали с двойными стенками и вакуумной изоляцией. Сохраняет напитки горячими до 12 часов, а холодными — до 24 часов. Герметичная крышка с защитой от протекания позволяет носить кружку в сумке или рюкзаке. Идеально подходит для автомобиля, офиса, прогулок и в качестве подарка.</textarea>
+        <textarea id="seoDescInput">Стильная термокружка PRO из пищевой нержавеющей стали с двойными стенками и вакуумной изоляцией. Сохраняет напитки горячими до 12 часов, а холодными — до 24 часов. Герметичная крышка с защитой от протекания позволяет носить кружку в сумке или рюкзаке. Идеально подходит для автомобиля, офиса, прогулок и в качестве подарка.</textarea>
       </div>
     </div>
   </div>
 
   <!-- Нижний закрепленный док -->
   <div class="bottom-dock">
-    <button class="btn-demo" id="downloadFreeBtn" type="button" title="Скачать демо с водяным знаком">📥</button>
+    <button class="btn-demo" id="downloadFreeBtn" type="button" title="Отправить демо с водяным знаком в чат">📥</button>
     <button class="btn-download-hd" id="mainActionBtn" type="button">⭐ Скачать в HD (от 35 ⭐)</button>
   </div>
 
@@ -586,7 +586,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <h2 style="margin:0; font-size:17px; font-weight:800;">💎 Скачать в HD без водяного знака</h2>
-          <div style="font-size:12px; color:var(--muted); margin-top:2px;">Готовый PNG 900×1200 px для WB и Ozon</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px;">Готовый PNG 900×1200 px придет в чат от бота</div>
         </div>
         <button id="closeModalBtn" type="button" style="background:var(--surface-2); border:none; color:#94a3b8; width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer;">✕</button>
       </div>
@@ -623,13 +623,13 @@
 
   <!-- Окно сохранения картинки -->
   <div class="save-modal" id="saveModal">
-    <div style="font-weight:800; font-size:16px; text-align:center;">📲 Ваша карточка готова!</div>
+    <div style="font-weight:800; font-size:16px; text-align:center;" id="saveModalTitle">📲 Ваша карточка готова!</div>
     <img id="exportedImg" src="" alt="Готовая карточка" />
-    <div style="font-size:12px; color:#cbd5e1; text-align:center; max-width:320px;">
-      Зажмите картинку пальцем и выберите <b>«Сохранить в галерею»</b> (или нажмите кнопку ниже)
+    <div style="font-size:12px; color:#cbd5e1; text-align:center; max-width:320px;" id="saveModalHint">
+      Файл также отправлен вам в личные сообщения от бота (или зажмите картинку пальцем для сохранения)
     </div>
     <div style="display:flex; gap:10px; width:100%; max-width:340px;">
-      <button class="btn btn-ai" id="shareNativeBtn" type="button">📤 Поделиться / Сохранить</button>
+      <button class="btn btn-ai" id="shareNativeBtn" type="button">📤 Поделиться</button>
       <button class="btn btn-ghost" id="closeSaveModalBtn" type="button" style="width:auto; padding:0 18px;">Закрыть</button>
     </div>
   </div>
@@ -642,6 +642,7 @@
     }
 
     const PAY_URL = "https://clinquant-sable-59544b.netlify.app/.netlify/functions/pay";
+    const AI_URL = "https://clinquant-sable-59544b.netlify.app/.netlify/functions/ai";
 
     const canvas = document.getElementById("cardCanvas");
     const ctx = canvas.getContext("2d");
@@ -950,33 +951,51 @@
       }
     }
 
-    function exportCardImage(filename) {
+    // ОТПРАВКА КАРТОЧКИ НАПРЯМУЮ В ЧАТ TELEGRAM + ПРЕДПРОСМОТР ДЛЯ СОХРАНЕНИЯ
+    async function exportCardImage(filename, isDemo) {
       drawCard();
       const dataUrl = canvas.toDataURL("image/png");
 
-      const link = document.createElement("a");
-      link.download = filename;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      document.getElementById("exportedImg").src = dataUrl;
+      document.getElementById("saveModalTitle").textContent = "⏳ Отправляем файл в ваш Telegram...";
+      document.getElementById("saveModal").classList.add("open");
 
-      canvas.toBlob((blob) => {
-        lastExportBlob = blob;
-        document.getElementById("exportedImg").src = dataUrl;
-        document.getElementById("saveModal").classList.add("open");
-      }, "image/png");
+      canvas.toBlob((blob) => { lastExportBlob = blob; }, "image/png");
+
+      const chatId = tg?.initDataUnsafe?.user?.id;
+      if (chatId) {
+        try {
+          const res = await fetch(AI_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "send_to_chat",
+              chat_id: chatId,
+              image: dataUrl,
+              filename: filename,
+              caption: isDemo
+                ? "🔒 Демо-версия карточки (с водяным знаком). Убрать водяной знак можно в приложении."
+                : "💎 Ваша HD-карточка 900×1200 px без водяных знаков готова к загрузке на WB и Ozon!"
+            })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            document.getElementById("saveModalTitle").textContent = "✅ Файл отправлен вам в чат с ботом!";
+            document.getElementById("saveModalHint").textContent = "Откройте диалог с ботом — картинка уже там в исходном качестве PNG.";
+            return;
+          }
+        } catch (e) {}
+      }
+
+      document.getElementById("saveModalTitle").textContent = "📲 Ваша карточка готова!";
+      document.getElementById("saveModalHint").textContent = "Зажмите картинку пальцем и выберите «Сохранить в галерею»";
     }
 
     document.getElementById("shareNativeBtn").addEventListener("click", async () => {
       if (!lastExportBlob) return;
       const file = new File([lastExportBlob], "mp-card-900x1200.png", { type: "image/png" });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: "Карточка товара WB/Ozon" });
-        } catch (e) {}
-      } else {
-        alert("Зажмите картинку на экране пальцем и нажмите «Сохранить изображение».");
+        try { await navigator.share({ files: [file], title: "Карточка товара WB/Ozon" }); } catch (e) {}
       }
     });
 
@@ -1009,12 +1028,11 @@
       });
     });
 
-    // Автоматическая вырезка фона снаружи (Flood-Fill)
-    function runFloodFillCutout() {
+    function runAdaptiveCutout() {
       if (!originalImg) return;
       const tol = Number(document.getElementById("tolRange").value);
 
-      const maxSide = 900;
+      const maxSide = 850;
       const origW = originalImg.naturalWidth || originalImg.width;
       const origH = originalImg.naturalHeight || originalImg.height;
       const scaleRatio = Math.min(1, maxSide / Math.max(origW, origH));
@@ -1030,40 +1048,48 @@
       const imgData = tCtx.getImageData(0, 0, w, h);
       const data = imgData.data;
 
-      const corners = [0, (w - 1) * 4, (h - 1) * w * 4, ((h - 1) * w + (w - 1)) * 4];
-      let bgR = 0, bgG = 0, bgB = 0;
-      corners.forEach(idx => { bgR += data[idx]; bgG += data[idx + 1]; bgB += data[idx + 2]; });
-      bgR /= 4; bgG /= 4; bgB /= 4;
+      let sumR = 0, sumG = 0, sumB = 0, count = 0;
+      for (let x = 0; x < w; x += 2) {
+        let iTop = x * 4, iBot = ((h - 1) * w + x) * 4;
+        sumR += data[iTop] + data[iBot]; sumG += data[iTop + 1] + data[iBot + 1]; sumB += data[iTop + 2] + data[iBot + 2]; count += 2;
+      }
+      for (let y = 0; y < h; y += 2) {
+        let iLeft = (y * w) * 4, iRight = (y * w + (w - 1)) * 4;
+        sumR += data[iLeft] + data[iRight]; sumG += data[iLeft + 1] + data[iRight + 1]; sumB += data[iLeft + 2] + data[iRight + 2]; count += 2;
+      }
+      const bgR = sumR / count, bgG = sumG / count, bgB = sumB / count;
 
       const visited = new Uint8Array(w * h);
       const mask = new Uint8Array(w * h);
       const queue = new Int32Array(w * h);
       let head = 0, tail = 0;
 
-      function colorDist(idx) {
-        const dr = data[idx] - bgR;
-        const dg = data[idx + 1] - bgG;
-        const db = data[idx + 2] - bgB;
+      function distToBg(idx) {
+        const dr = data[idx] - bgR, dg = data[idx + 1] - bgG, db = data[idx + 2] - bgB;
+        return Math.sqrt(dr * dr + dg * dg + db * db);
+      }
+
+      function distBetween(idx1, idx2) {
+        const dr = data[idx1] - data[idx2], dg = data[idx1 + 1] - data[idx2 + 1], db = data[idx1 + 2] - data[idx2 + 2];
         return Math.sqrt(dr * dr + dg * dg + db * db);
       }
 
       for (let x = 0; x < w; x++) {
-        const top = x;
-        const bot = (h - 1) * w + x;
-        if (!visited[top] && colorDist(top * 4) < tol) { visited[top] = 1; mask[top] = 1; queue[tail++] = top; }
-        if (!visited[bot] && colorDist(bot * 4) < tol) { visited[bot] = 1; mask[bot] = 1; queue[tail++] = bot; }
+        const top = x, bot = (h - 1) * w + x;
+        if (!visited[top] && distToBg(top * 4) < tol * 1.25) { visited[top] = 1; mask[top] = 1; queue[tail++] = top; }
+        if (!visited[bot] && distToBg(bot * 4) < tol * 1.25) { visited[bot] = 1; mask[bot] = 1; queue[tail++] = bot; }
       }
       for (let y = 0; y < h; y++) {
-        const left = y * w;
-        const right = y * w + (w - 1);
-        if (!visited[left] && colorDist(left * 4) < tol) { visited[left] = 1; mask[left] = 1; queue[tail++] = left; }
-        if (!visited[right] && colorDist(right * 4) < tol) { visited[right] = 1; mask[right] = 1; queue[tail++] = right; }
+        const left = y * w, right = y * w + (w - 1);
+        if (!visited[left] && distToBg(left * 4) < tol * 1.25) { visited[left] = 1; mask[left] = 1; queue[tail++] = left; }
+        if (!visited[right] && distToBg(right * 4) < tol * 1.25) { visited[right] = 1; mask[right] = 1; queue[tail++] = right; }
       }
 
+      const stepMax = Math.max(14, tol * 0.42);
       while (head < tail) {
         const pos = queue[head++];
-        const px = pos % w;
-        const py = (pos - px) / w;
+        const posIdx = pos * 4;
+        const px = pos % w, py = (pos - px) / w;
 
         const neighbors = [];
         if (px > 0) neighbors.push(pos - 1);
@@ -1075,7 +1101,8 @@
           const n = neighbors[i];
           if (!visited[n]) {
             visited[n] = 1;
-            if (colorDist(n * 4) < tol) {
+            const nIdx = n * 4;
+            if (distToBg(nIdx) < tol && distBetween(posIdx, nIdx) < stepMax) {
               mask[n] = 1;
               queue[tail++] = n;
             }
@@ -1085,8 +1112,7 @@
 
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-          const p = y * w + x;
-          const idx = p * 4;
+          const p = y * w + x, idx = p * 4;
           if (mask[p] === 1) {
             data[idx + 3] = 0;
           } else {
@@ -1095,36 +1121,29 @@
             if (x < w - 1 && mask[p + 1]) bgNeighbors++;
             if (y > 0 && mask[p - w]) bgNeighbors++;
             if (y < h - 1 && mask[p + w]) bgNeighbors++;
-            if (bgNeighbors > 0) {
-              data[idx + 3] = Math.round(data[idx + 3] * (1 - bgNeighbors * 0.18));
-            }
+            if (bgNeighbors > 0) data[idx + 3] = Math.round(data[idx + 3] * (1 - bgNeighbors * 0.2));
           }
         }
       }
 
       tCtx.putImageData(imgData, 0, 0);
       const cleanImg = new Image();
-      cleanImg.onload = () => {
-        productImg = cleanImg;
-        drawCard();
-      };
+      cleanImg.onload = () => { productImg = cleanImg; drawCard(); };
       cleanImg.src = tempCanvas.toDataURL("image/png");
     }
 
-    // Сжимаем загруженное фото до миниатюры 380px для Vision AI
     function getThumbBase64(img) {
       const c = document.createElement("canvas");
-      const maxS = 380;
+      const maxS = 400;
       const w = img.naturalWidth || img.width;
       const h = img.naturalHeight || img.height;
       const r = Math.min(1, maxS / Math.max(w, h));
       c.width = Math.round(w * r);
       c.height = Math.round(h * r);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      return c.toDataURL("image/jpeg", 0.75);
+      return c.toDataURL("image/jpeg", 0.8);
     }
 
-    // Применение JSON-ответа от ИИ на карточку и в поля редактирования
     function applyAiContent(parsed) {
       if (parsed.theme) applyThemeById(parsed.theme);
       if (parsed.badge) document.getElementById("badgeInput").value = parsed.badge;
@@ -1137,59 +1156,45 @@
       drawCard();
     }
 
-    // VISION AI: Распознавание товара по фото + авто-заполнение иконок, плашек и SEO-описания
-    async function analyzeProductWithVisionAI() {
-      if (!originalImg) return;
+    // ВЫЗОВ GEMINI VISION AI ЧЕРЕЗ СЕРВЕР NETLIFY
+    async function callGeminiAI(withPhoto) {
       analyzePhotoBtn.disabled = true;
+      document.getElementById("generateAiTextBtn").disabled = true;
       statusBox.style.display = "block";
-      statusBox.textContent = "🧠 Vision AI определяет товар по фото, подбирает иконки, тему и пишет SEO-описание...";
+      statusBox.textContent = "🧠 Gemini AI анализирует товар, подбирает иконки и пишет SEO-описание...";
 
-      const thumbDataUrl = getThumbBase64(originalImg);
-      const systemPrompt = `Ты топ-дизайнер и SEO-маркетолог Wildberries и Ozon. Посмотри на фото товара и определи, что это за товар.
-Верни СТРОГО валидный JSON без markdown с полями:
-- "theme": выбери наиболее подходящую из ["wb_bright", "dark_luxury", "tech_blue", "eco_minimal", "sale_red", "mint_fresh"]
-- "badge": короткий верхний стикер капсом до 18 символов (например "ХИТ СЕЗОНА 2026")
-- "title": название товара на русском капсом до 22 символов (например "КРОССОВКИ МУЖСКИЕ")
-- "sub": ключевая фишка товара до 36 символов
-- "b1": подходящая эмодзи-иконка + преимущество 1 (до 18 символов)
-- "b2": подходящая эмодзи-иконка + преимущество 2 (до 18 символов)
-- "b3": подходящая эмодзи-иконка + нижний УТП-баннер (до 38 символов)
-- "description": продающее SEO-описание товара для WB/Ozon на русском (3-4 предложения, 280-400 символов).`;
+      const payload = {
+        action: "analyze_product",
+        title: document.getElementById("titleInput").value.trim(),
+        image: withPhoto && originalImg ? getThumbBase64(originalImg) : null
+      };
 
       try {
-        const res = await fetch("https://text.pollinations.ai/", {
+        const res = await fetch(AI_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: systemPrompt },
-                  { type: "image_url", image_url: { url: thumbDataUrl } }
-                ]
-              }
-            ],
-            model: "openai",
-            jsonMode: true
-          })
+          body: JSON.stringify(payload)
         });
+        const result = await res.json();
 
-        const rawText = await res.text();
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("No JSON");
-        const parsed = JSON.parse(jsonMatch[0]);
+        if (!result.ok || !result.data) {
+          throw new Error(result.error || "Ошибка ответа Gemini");
+        }
 
-        applyAiContent(parsed);
-        statusBox.textContent = `✅ ИИ распознал: «${parsed.title || "Товар"}» — иконки, плашки и SEO-описание готовы (можно править во вкладке «Тексты & SEO»)!`;
+        applyAiContent(result.data);
+        statusBox.textContent = `✅ Готово! Gemini определил: «${result.data.title}» — иконки, стиль и SEO-описание заполнены.`;
+        document.getElementById("aiTextStatus").style.display = "block";
+        document.getElementById("aiTextStatus").textContent = "✅ Иконки, плашки и SEO-описание сгенерированы Gemini AI!";
       } catch (err) {
-        statusBox.textContent = "✂️ Фон вырезан! Для авто-генерации текстов и иконок перейдите во вкладку «✍️ Тексты & SEO».";
+        statusBox.textContent = "⚠️ Ошибка Gemini API: " + err.message;
+        document.getElementById("aiTextStatus").style.display = "block";
+        document.getElementById("aiTextStatus").textContent = "⚠️ Ошибка Gemini API: " + err.message;
       } finally {
-        analyzePhotoBtn.disabled = false;
+        if (originalImg) analyzePhotoBtn.disabled = false;
+        document.getElementById("generateAiTextBtn").disabled = false;
       }
     }
 
-    // При загрузке фото: сразу вырезаем фон И запускаем Vision AI распознавание
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1204,8 +1209,8 @@
           analyzePhotoBtn.disabled = false;
           restoreBgBtn.disabled = false;
           document.getElementById("toleranceBox").style.display = "flex";
-          runFloodFillCutout();
-          analyzeProductWithVisionAI();
+          runAdaptiveCutout();
+          callGeminiAI(true);
         };
         img.src = ev.target.result;
       };
@@ -1213,8 +1218,8 @@
     });
 
     analyzePhotoBtn.addEventListener("click", () => {
-      runFloodFillCutout();
-      analyzeProductWithVisionAI();
+      runAdaptiveCutout();
+      callGeminiAI(true);
     });
 
     restoreBgBtn.addEventListener("click", () => {
@@ -1226,7 +1231,7 @@
 
     document.getElementById("tolRange").addEventListener("input", (e) => {
       document.getElementById("tolVal").textContent = e.target.value;
-      runFloodFillCutout();
+      runAdaptiveCutout();
     });
 
     document.getElementById("generateAiBgBtn").addEventListener("click", () => {
@@ -1234,41 +1239,10 @@
       drawCard();
     });
 
-    // Генерация иконок, плашек и SEO-описания по названию товара (во вкладке Тексты)
-    const generateAiTextBtn = document.getElementById("generateAiTextBtn");
-    const aiTextStatus = document.getElementById("aiTextStatus");
-
-    generateAiTextBtn.addEventListener("click", async () => {
-      const productTitle = document.getElementById("titleInput").value.trim() || "Товар для маркетплейса";
-      generateAiTextBtn.disabled = true;
-      aiTextStatus.style.display = "block";
-      aiTextStatus.textContent = "✍️ Нейросеть подбирает тематические иконки, плашки и SEO-описание...";
-
-      const prompt = `Ты топ-дизайнер карточек Wildberries и Ozon. Для товара "${productTitle}" подбери тематические эмодзи-иконки, короткие плашки и SEO-описание. Верни СТРОГО валидный JSON без markdown с полями:
-- "badge": стикер капсом до 18 символов
-- "sub": подзаголовок до 36 символов
-- "b1": эмодзи-иконка + преимущество 1 (до 18 символов)
-- "b2": эмодзи-иконка + преимущество 2 (до 18 символов)
-- "b3": эмодзи-иконка + нижний УТП-баннер (до 38 символов)
-- "description": продающее SEO-описание для карточки WB/Ozon на русском (3-4 предложения).`;
-
-      try {
-        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
-        const rawText = await res.text();
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("Parse error");
-        const parsed = JSON.parse(jsonMatch[0]);
-
-        applyAiContent(parsed);
-        aiTextStatus.textContent = "✅ Иконки, плашки и SEO-описание обновлены! Можете отредактировать любое поле ниже.";
-      } catch (err) {
-        aiTextStatus.textContent = "⚠️ ИИ-сервер перегружен. Выберите готовый шаблон ниже или отредактируйте поля вручную.";
-      } finally {
-        generateAiTextBtn.disabled = false;
-      }
+    document.getElementById("generateAiTextBtn").addEventListener("click", () => {
+      callGeminiAI(Boolean(originalImg));
     });
 
-    // Копирование SEO-описания в буфер обмена
     document.getElementById("copyDescBtn").addEventListener("click", async () => {
       const descText = document.getElementById("seoDescInput").value;
       try {
@@ -1311,15 +1285,16 @@
       });
     });
 
+    // Кнопка скачивания демо (с водяным знаком) -> отправляет файл в чат с ботом
     document.getElementById("downloadFreeBtn").addEventListener("click", () => {
-      exportCardImage("mp-card-demo.png");
+      exportCardImage("mp-card-demo.png", true);
     });
 
     const modal = document.getElementById("paywallModal");
     const openModal = () => {
       if (credits > 0) {
         const currentCredits = credits;
-        exportCardImage("mp-card-hd-900x1200.png");
+        exportCardImage("mp-card-hd-900x1200.png", false);
         if (currentCredits < 1000) {
           credits = Math.max(0, credits - 1);
           localStorage.setItem("mp_studio_credits", String(credits));
