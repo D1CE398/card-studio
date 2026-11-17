@@ -3,20 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>MP Design Studio — Карточки для WB и Ozon</title>
+  <title>MP Design Studio — AI Генератор карточек WB & Ozon</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f1115;
-      --panel: #181b22;
-      --border: #2a2f3d;
-      --text: #f3f4f6;
-      --muted: #9ca3af;
-      --accent: #6366f1;
-      --accent-hover: #4f46e5;
+      --bg: #090a0f;
+      --surface: #12151e;
+      --surface-2: #1a1f2e;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(139, 92, 246, 0.6);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #7c3aed;
+      --primary-grad: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      --gold-grad: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      --success: #10b981;
     }
 
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
       margin: 0;
       background: var(--bg);
@@ -24,117 +36,226 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      padding-bottom: 84px; /* место под нижний док */
     }
 
-    .topbar {
+    /* Верхняя шапка */
+    .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--panel);
+      padding: 10px 16px;
+      background: rgba(18, 21, 30, 0.85);
+      backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 30;
     }
-    .topbar h1 { font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px; }
-    .pro-pill {
-      background: linear-gradient(135deg, #f59e0b, #ef4444);
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: var(--primary-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .pro-badge {
+      background: var(--gold-grad);
       color: #fff;
       font-size: 11px;
       font-weight: 800;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 999px;
       border: none;
       cursor: pointer;
-    }
-
-    .workspace {
       display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+    }
+    .pro-badge.unlocked {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: none;
+    }
+
+    /* Основной макет */
+    .app-layout {
+      display: flex;
+      flex-direction: column;
       flex: 1;
     }
 
-    .preview-area {
-      flex: 1;
+    /* Сцена с карточкой */
+    .stage {
+      background: radial-gradient(circle at 50% 30%, #171c2c 0%, #090a0f 100%);
+      padding: 14px 16px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 16px;
-      background: #0b0d10;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      border-radius: 14px;
+      padding: 3px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.03));
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
     }
 
     canvas {
-      max-height: 46vh;
+      display: block;
+      height: 41vh;
+      max-height: 360px;
       width: auto;
-      max-width: 100%;
       border-radius: 12px;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
-      background: #1f2430;
+      background: #161922;
     }
 
-    .controls {
-      width: 420px;
-      background: var(--panel);
-      border-left: 1px solid var(--border);
-      padding: 16px;
+    .stage-meta {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .meta-tag {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    /* Навигация по вкладкам */
+    .tabs-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      padding: 10px 14px;
+      background: var(--bg);
+      position: sticky;
+      top: 51px;
+      z-index: 25;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 9px 6px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--surface-2);
+      color: #fff;
+      border-color: var(--border-active);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.18);
+    }
+
+    /* Контент вкладок */
+    .panel-container {
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
       gap: 14px;
-      overflow-y: auto;
-    }
-
-    .group { display: flex; flex-direction: column; gap: 6px; }
-    label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
-
-    input[type="text"], select {
-      background: #0f1115;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      outline: none;
+      max-width: 560px;
       width: 100%;
+      margin: 0 auto;
     }
-    input[type="text"]:focus, select:focus { border-color: var(--accent); }
 
-    .upload-box {
-      border: 2px dashed var(--border);
-      border-radius: 12px;
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      animation: fadeIn 0.18s ease;
+    }
+    .tab-pane.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
       padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Зона загрузки фото */
+    .upload-zone {
+      border: 1.5px dashed rgba(139, 92, 246, 0.5);
+      background: rgba(124, 58, 237, 0.06);
+      border-radius: 12px;
+      padding: 16px;
       text-align: center;
       cursor: pointer;
-      background: rgba(255,255,255,0.02);
+      transition: 0.15s;
     }
-    .upload-box input { display: none; }
-
-    .presets-row {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-    .preset-chip {
-      background: #232836;
-      border: 1px solid var(--border);
-      color: #e5e7eb;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .upload-zone:active { transform: scale(0.99); }
+    .upload-zone input { display: none; }
 
     .btn {
-      background: var(--accent);
-      color: white;
       border: none;
-      padding: 13px 16px;
-      border-radius: 12px;
-      font-size: 14px;
+      border-radius: 11px;
+      padding: 12px 14px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -142,187 +263,540 @@
       justify-content: center;
       gap: 8px;
       width: 100%;
+      transition: 0.15s;
     }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-secondary { background: #262b38; }
-    .btn-pro { background: linear-gradient(135deg, #f59e0b, #ef4444); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-ai {
+      background: var(--primary-grad);
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(139, 92, 246, 0.28);
+    }
+    .btn-ghost {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
 
-    .status {
+    .ai-status {
       font-size: 12px;
-      padding: 10px;
-      border-radius: 8px;
-      background: rgba(99, 102, 241, 0.15);
-      color: #c7d2fe;
+      padding: 10px 12px;
+      border-radius: 9px;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      color: #ddd6fe;
       display: none;
+      line-height: 1.4;
     }
 
-    .sliders { display: flex; flex-direction: column; gap: 8px; background: #12151b; padding: 12px; border-radius: 10px; border: 1px solid var(--border); }
-    .slider-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); }
-    input[type="range"] { width: 65%; accent-color: var(--accent); }
+    /* Слайдеры */
+    .slider-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .slider-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #8b5cf6;
+      height: 5px;
+      background: #252b3d;
+      border-radius: 5px;
+    }
 
-    /* Модальное окно оплаты (Paywall) */
-    .modal-backdrop {
+    /* Сетка тем (Свотчи) */
+    .themes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .theme-card {
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 11px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-align: left;
+    }
+    .theme-card.active {
+      border-color: #8b5cf6;
+      background: rgba(139, 92, 246, 0.12);
+    }
+
+    .theme-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .theme-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .theme-desc {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* Переключатель подиума */
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--bg);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .seg-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 7px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .seg-btn.active {
+      background: var(--surface-2);
+      color: #fff;
+    }
+
+    /* Текстовые поля и пресеты */
+    .presets-scroll {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .presets-scroll::-webkit-scrollbar { display: none; }
+
+    .chip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: #e2e8f0;
+      padding: 7px 11px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .chip:active { border-color: #8b5cf6; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .field span {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      outline: none;
+      width: 100%;
+    }
+    input[type="text"]:focus {
+      border-color: #8b5cf6;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* Закрепленный нижний док */
+    .bottom-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(18, 21, 30, 0.92);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      padding: 10px 16px 14px;
+      display: flex;
+      gap: 10px;
+      z-index: 40;
+    }
+
+    .btn-demo {
+      width: 48px;
+      flex-shrink: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-download-hd {
+      flex: 1;
+      background: var(--gold-grad);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    }
+    .btn-download-hd.ready {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+    }
+
+    /* Модалка оплаты Telegram Stars */
+    .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.82);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: flex-end;
       justify-content: center;
       z-index: 100;
     }
-    .modal-backdrop.active { display: flex; }
-    .modal-card {
-      background: #181b22;
-      border-top: 1px solid #2e3446;
-      border-radius: 20px 20px 0 0;
-      padding: 24px 20px 32px;
+    .modal-overlay.open { display: flex; }
+
+    .modal-sheet {
+      background: var(--surface);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      border-radius: 22px 22px 0 0;
+      padding: 22px 18px 28px;
       width: 100%;
       max-width: 480px;
       display: flex;
       flex-direction: column;
       gap: 14px;
-      animation: slideUp 0.25s ease-out;
+      animation: sheetUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .tariff {
-      background: #0f1115;
-      border: 1px solid #2a2f3d;
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .plan-card {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
       padding: 14px;
-      border-radius: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
+      position: relative;
     }
-    .tariff.selected { border-color: #f59e0b; background: rgba(245, 158, 11, 0.08); }
+    .plan-card.selected {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.08);
+    }
 
-    @media (min-width: 850px) {
-      canvas { max-height: 78vh; }
-      .modal-backdrop { align-items: center; }
-      .modal-card { border-radius: 20px; border: 1px solid #2e3446; }
+    .plan-tag {
+      position: absolute;
+      top: -9px;
+      right: 12px;
+      background: #10b981;
+      color: #052e16;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 99px;
+      text-transform: uppercase;
     }
-    @media (max-width: 849px) {
-      .workspace { flex-direction: column; }
-      .controls { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+
+    @media (min-width: 820px) {
+      body { padding-bottom: 0; }
+      .app-layout {
+        flex-direction: row;
+        height: calc(100vh - 53px);
+      }
+      .stage {
+        flex: 1;
+        justify-content: center;
+        border-bottom: none;
+        border-right: 1px solid var(--border);
+      }
+      canvas {
+        height: 74vh;
+        max-height: 720px;
+      }
+      .right-side {
+        width: 440px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        padding-bottom: 80px;
+      }
+      .bottom-dock {
+        left: auto;
+        width: 440px;
+      }
+      .modal-overlay { align-items: center; }
+      .modal-sheet { border-radius: 22px; border: 1px solid rgba(255,255,255,0.12); }
     }
   </style>
 </head>
 <body>
 
-  <div class="topbar">
-    <h1>🎨 MP Design Studio</h1>
-    <button class="pro-pill" id="openPaywallTop">⚡ Снять водяной знак</button>
-  </div>
-
-  <div class="workspace">
-    <div class="preview-area">
-      <canvas id="cardCanvas" width="900" height="1200"></canvas>
-    </div>
-
-    <div class="controls">
-      <div class="group">
-        <label>1. Загрузите фото товара</label>
-        <label class="upload-box">
-          <input type="file" id="fileInput" accept="image/*" />
-          <div style="font-weight:700; font-size:14px;">📸 Выбрать фото из галереи</div>
-          <div style="font-size:12px; color:var(--muted); margin-top:2px;">Любой фон — вырежем автоматически</div>
-        </label>
-        <button class="btn btn-secondary" id="removeBgBtn" disabled>✨ Удалить фон нейросетью</button>
-        <div class="status" id="statusBox"></div>
-      </div>
-
-      <div class="group">
-        <label>2. Айдентика (стиль)</label>
-        <select id="themeSelect">
-          <option value="dark_luxury">Премиум Тёмный (Золото / Графит)</option>
-          <option value="wb_bright">Яркий Маркетплейс (Фиолет / Неон)</option>
-          <option value="eco_minimal">Эко / Минимализм (Беж / Олива)</option>
-          <option value="tech_blue">Техно / Гаджеты (Синий / Кибер)</option>
-        </select>
-      </div>
-
-      <div class="group">
-        <label>3. Быстрое заполнение ниши</label>
-        <div class="presets-row">
-          <button class="preset-chip" data-preset="thermo">☕ Термокружка</button>
-          <button class="preset-chip" data-preset="tech">🎧 Наушники</button>
-          <button class="preset-chip" data-preset="cosmetic">✨ Сыворотка</button>
-          <button class="preset-chip" data-preset="clothes">👕 Худи оверсайз</button>
-        </div>
-      </div>
-
-      <div class="group">
-        <label>4. Тексты на карточке</label>
-        <input type="text" id="badgeInput" value="ХИТ ПРОДАЖ 2026" placeholder="Бейдж сверху" />
-        <input type="text" id="titleInput" value="ТЕРМОКРУЖКА PRO" placeholder="Главный заголовок" />
-        <input type="text" id="subInput" value="Нержавеющая сталь • Вакуумная изоляция" placeholder="Подзаголовок" />
-        <div class="row-2">
-          <input type="text" id="b1Input" value="🔥 Тепло до 12 ч" placeholder="Плашка 1" />
-          <input type="text" id="b2Input" value="💧 100% герметична" placeholder="Плашка 2" />
-        </div>
-        <input type="text" id="b3Input" value="🛡️ Гарантия 2 года • Подарочная коробка" placeholder="Нижняя плашка" />
-      </div>
-
-      <div class="group">
-        <label>5. Масштаб и положение товара</label>
-        <div class="sliders">
-          <div class="slider-row"><span>Масштаб</span><input type="range" id="scaleRange" min="0.3" max="1.6" step="0.02" value="0.85" /></div>
-          <div class="slider-row"><span>Сдвиг X</span><input type="range" id="posXRange" min="-250" max="250" step="5" value="0" /></div>
-          <div class="slider-row"><span>Сдвиг Y</span><input type="range" id="posYRange" min="-250" max="250" step="5" value="60" /></div>
-        </div>
-      </div>
-
-      <div class="group" style="gap: 8px; padding-bottom: 20px;">
-        <button class="btn btn-pro" id="buyProBtn">💎 Скачать в HD без водяного знака</button>
-        <button class="btn btn-secondary" id="downloadFreeBtn">⬇️ Скачать демо-версию (с водяным знаком)</button>
+  <!-- Шапка -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-logo">MP</div>
+      <div>
+        <div class="brand-title">Design Studio</div>
+        <div class="brand-sub">WB • Ozon • Яндекс Маркет</div>
       </div>
     </div>
+    <button class="pro-badge" id="topProBtn">⭐ Убрать водяной знак</button>
+  </header>
+
+  <div class="app-layout">
+    <!-- Сцена превью -->
+    <section class="stage">
+      <div class="canvas-wrapper">
+        <canvas id="cardCanvas" width="900" height="1200"></canvas>
+      </div>
+      <div class="stage-meta">
+        <span class="meta-tag">📐 900 × 1200 px (3:4)</span>
+        <span class="meta-tag" id="qualityTag">🔒 Демо-режим</span>
+      </div>
+    </section>
+
+    <!-- Правая / Нижняя рабочая зона -->
+    <div class="right-side">
+      <nav class="tabs-bar">
+        <button class="tab-btn active" data-tab="tabProduct">📸 Товар</button>
+        <button class="tab-btn" data-tab="tabStyle">🎨 Стиль</button>
+        <button class="tab-btn" data-tab="tabText">✍️ Тексты</button>
+      </nav>
+
+      <div class="panel-container">
+        <!-- Вкладка 1: Товар и нейросеть -->
+        <div class="tab-pane active" id="tabProduct">
+          <div class="card-box">
+            <div class="section-label">
+              <span>Фотография товара</span>
+              <span style="color:#a78bfa;">AI Фон</span>
+            </div>
+            <label class="upload-zone">
+              <input type="file" id="fileInput" accept="image/*" />
+              <div style="font-size:22px; margin-bottom:4px;">📷</div>
+              <div style="font-weight:700; font-size:13px;">Загрузить фото из галереи</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">Можно прямо с телефона на любом фоне</div>
+            </label>
+            <button class="btn btn-ai" id="removeBgBtn" disabled>✨ Удалить фон нейросетью</button>
+            <div class="ai-status" id="statusBox"></div>
+          </div>
+
+          <div class="card-box">
+            <div class="section-label">
+              <span>Позиция на подиуме</span>
+              <span id="resetPosBtn" style="color:#8b5cf6; cursor:pointer; text-transform:none;">Сбросить</span>
+            </div>
+            <div class="slider-item">
+              <div class="slider-head"><span>Масштаб товара</span><span id="scaleVal">85%</span></div>
+              <input type="range" id="scaleRange" min="0.3" max="1.6" step="0.02" value="0.85" />
+            </div>
+            <div class="slider-item">
+              <div class="slider-head"><span>Сдвиг по горизонтали</span><span id="posXVal">0</span></div>
+              <input type="range" id="posXRange" min="-250" max="250" step="5" value="0" />
+            </div>
+            <div class="slider-item">
+              <div class="slider-head"><span>Сдвиг по вертикали</span><span id="posYVal">55</span></div>
+              <input type="range" id="posYRange" min="-250" max="250" step="5" value="55" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Вкладка 2: Стиль и айдентика -->
+        <div class="tab-pane" id="tabStyle">
+          <div class="card-box">
+            <div class="section-label">Цветовая айдентика</div>
+            <div class="themes-grid" id="themesGrid">
+              <div class="theme-card active" data-theme="wb_bright">
+                <div class="theme-swatch" style="background:linear-gradient(135deg,#6d28d9,#ec4899);"></div>
+                <div>
+                  <div class="theme-name">WB Неон</div>
+                  <div class="theme-desc">Фиолет & Розовый</div>
+                </div>
+              </div>
+              <div class="theme-card" data-theme="dark_luxury">
+                <div class="theme-swatch" style="background:linear-gradient(135deg,#1e293b,#f59e0b);"></div>
+                <div>
+                  <div class="theme-name">Премиум Голд</div>
+                  <div class="theme-desc">Графит & Золото</div>
+                </div>
+              </div>
+              <div class="theme-card" data-theme="tech_blue">
+                <div class="theme-swatch" style="background:linear-gradient(135deg,#0284c7,#0f172a);"></div>
+                <div>
+                  <div class="theme-name">Ozon Техно</div>
+                  <div class="theme-desc">Кибер-синий</div>
+                </div>
+              </div>
+              <div class="theme-card" data-theme="eco_minimal">
+                <div class="theme-swatch" style="background:linear-gradient(135deg,#f5f2eb,#65a30d);"></div>
+                <div>
+                  <div class="theme-name">Эко & Бьюти</div>
+                  <div class="theme-desc">Беж & Олива</div>
+                </div>
+              </div>
+              <div class="theme-card" data-theme="sale_red">
+                <div class="theme-swatch" style="background:linear-gradient(135deg,#dc2626,#18181b);"></div>
+                <div>
+                  <div class="theme-name">Хит Продаж</div>
+                  <div class="theme-desc">Алый & Черный</div>
+                </div>
+              </div>
+              <div class="theme-card" data-theme="mint_fresh">
+                <div class="theme-swatch" style="background:linear-gradient(135deg,#0d9488,#064e3b);"></div>
+                <div>
+                  <div class="theme-name">Изумруд</div>
+                  <div class="theme-desc">Глубокий мята</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-box">
+            <div class="section-label">Подставка под товар</div>
+            <div class="segmented" id="podiumTypeGroup">
+              <button class="seg-btn active" data-podium="disc">3D Подиум</button>
+              <button class="seg-btn" data-podium="shadow">Парящий</button>
+              <button class="seg-btn" data-podium="none">Без тени</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Вкладка 3: Тексты и триггеры -->
+        <div class="tab-pane" id="tabText">
+          <div class="card-box">
+            <div class="section-label">Готовые шаблоны ниш</div>
+            <div class="presets-scroll">
+              <button class="chip" data-preset="thermo">☕ Термокружка</button>
+              <button class="chip" data-preset="tech">🎧 Наушники</button>
+              <button class="chip" data-preset="cosmetic">✨ Сыворотка</button>
+              <button class="chip" data-preset="clothes">👕 Худи оверсайз</button>
+            </div>
+          </div>
+
+          <div class="card-box">
+            <div class="section-label">Заголовки и инфографика</div>
+            <div class="field">
+              <span>Верхний стикер (бейдж)</span>
+              <input type="text" id="badgeInput" value="ХИТ ПРОДАЖ 2026" />
+            </div>
+            <div class="field">
+              <span>Главный заголовок товара</span>
+              <input type="text" id="titleInput" value="ТЕРМОКРУЖКА PRO" />
+            </div>
+            <div class="field">
+              <span>Подзаголовок / Характеристика</span>
+              <input type="text" id="subInput" value="Нержавеющая сталь • Вакуумная изоляция" />
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <span>Плашка слева</span>
+                <input type="text" id="b1Input" value="🔥 Тепло до 12 ч" />
+              </div>
+              <div class="field">
+                <span>Плашка справа</span>
+                <input type="text" id="b2Input" value="💧 100% герметична" />
+              </div>
+            </div>
+            <div class="field">
+              <span>Нижний акцентный баннер</span>
+              <input type="text" id="b3Input" value="🛡️ Гарантия 2 года • Подарочная коробка" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Окно покупки PRO -->
-  <div class="modal-backdrop" id="paywallModal">
-    <div class="modal-card">
+  <!-- Нижний закрепленный док -->
+  <div class="bottom-dock">
+    <button class="btn-demo" id="downloadFreeBtn" title="Скачать демо с водяным знаком">📥</button>
+    <button class="btn-download-hd" id="mainActionBtn">⭐ Скачать в HD без водяного знака</button>
+  </div>
+
+  <!-- Шторка оплаты Telegram Stars -->
+  <div class="modal-overlay" id="paywallModal">
+    <div class="modal-sheet">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="margin:0; font-size:18px;">💎 Доступ без водяных знаков</h2>
-        <button id="closeModalBtn" style="background:none; border:none; color:#9ca3af; font-size:22px; cursor:pointer;">✕</button>
-      </div>
-      <p style="margin:0; font-size:13px; color:#9ca3af;">
-        Скачивайте неограниченное количество карточек в максимальном качестве 900×1200 px для WB, Ozon и Яндекс Маркета.
-      </p>
-
-      <div class="tariff selected" data-plan="Пакет на 1 месяц — 390 ₽">
         <div>
-          <div style="font-weight:700; font-size:15px;">Безлимит на 30 дней</div>
-          <div style="font-size:12px; color:#9ca3af;">Все стили + удаление фона без ограничений</div>
+          <h2 style="margin:0; font-size:18px; font-weight:800;">💎 Экспорт в HD без водяных знаков</h2>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px;">Готовый файл 900×1200 px для WB и Ozon</div>
         </div>
-        <div style="font-weight:900; font-size:18px; color:#fbbf24;">390 ₽</div>
+        <button id="closeModalBtn" style="background:var(--surface-2); border:none; color:#94a3b8; width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer;">✕</button>
       </div>
 
-      <div class="tariff" data-plan="Вечный доступ (PRO) — 990 ₽">
+      <div class="plan-card selected" data-stars="150" data-title="Безлимит на 30 дней">
         <div>
-          <div style="font-weight:700; font-size:15px;">Доступ навсегда</div>
-          <div style="font-size:12px; color:#9ca3af;">Разовая оплата • Все будущие шаблоны</div>
+          <div style="font-weight:700; font-size:14px;">Безлимит на 30 дней</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Все стили + удаление фона без ограничений</div>
         </div>
-        <div style="font-weight:900; font-size:18px; color:#10b981;">990 ₽</div>
+        <div style="font-weight:900; font-size:17px; color:#fbbf24;">150 ⭐</div>
       </div>
 
-      <button class="btn btn-pro" id="proceedPayBtn">🚀 Оплатить и получить ключ доступа</button>
-      <div style="text-align:center; font-size:11px; color:#6b7280;">Оплата картой РФ / СБП • Моментальная активация</div>
+      <div class="plan-card" data-stars="450" data-title="Вечный PRO-доступ">
+        <div class="plan-tag">Выгодно</div>
+        <div>
+          <div style="font-weight:700; font-size:14px;">Доступ навсегда (PRO)</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Разовая оплата • Без подписок и лимитов</div>
+        </div>
+        <div style="font-weight:900; font-size:17px; color:#34d399;">450 ⭐</div>
+      </div>
+
+      <button class="btn-download-hd" id="payStarsBtn" style="width:100%;">⭐ Оплатить в 1 клик (150 Stars)</button>
+      <div style="text-align:center; font-size:11px; color:var(--muted);">Мгновенная активация внутри Telegram</div>
     </div>
   </div>
 
   <script type="module">
     import { removeBackground } from "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm";
 
-    // Инициализация Telegram WebApp
     const tg = window.Telegram?.WebApp;
     if (tg) {
       tg.ready();
       tg.expand();
+      tg.setHeaderColor?.("#12151e");
+      tg.setBackgroundColor?.("#090a0f");
     }
 
-    // ЗАМЕНИТЕ НА ВАШ ЛИЧНЫЙ ЮЗЕРНЕЙМ В TELEGRAM (без @)
-    const SELLER_USERNAME = "YOUR_TELEGRAM_USERNAME";
+    const PAY_URL = "https://clinquant-sable-59544b.netlify.app/.netlify/functions/pay";
 
     const canvas = document.getElementById("cardCanvas");
     const ctx = canvas.getContext("2d");
@@ -332,50 +806,90 @@
 
     let rawFile = null;
     let productImg = null;
-    let isProUnlocked = false;
-    let selectedPlan = "Пакет на 1 месяц — 390 ₽";
+    let currentTheme = "wb_bright";
+    let podiumStyle = "disc";
+    let isProUnlocked = localStorage.getItem("mp_studio_pro") === "true";
+    let selectedStars = 150;
+    let selectedTitle = "Безлимит на 30 дней";
 
     const THEMES = {
-      dark_luxury: {
-        bgTop: "#14161d", bgBottom: "#090a0e",
-        glow: "rgba(245, 158, 11, 0.22)",
-        podiumTop: "#2b2f3c", podiumSide: "#171922",
-        badgeBg: "#f59e0b", badgeText: "#111827",
-        titleColor: "#ffffff", subColor: "#d1d5db",
-        pillBg: "rgba(255, 255, 255, 0.08)", pillBorder: "rgba(245, 158, 11, 0.45)", pillText: "#fef3c7"
-      },
       wb_bright: {
-        bgTop: "#4c1d95", bgBottom: "#1e1b4b",
-        glow: "rgba(236, 72, 153, 0.35)",
-        podiumTop: "#7c3aed", podiumSide: "#3b0764",
+        bgTop: "#3b0764", bgMid: "#1e1b4b", bgBottom: "#0f0a1e",
+        glow: "rgba(236, 72, 153, 0.38)",
+        rim: "rgba(168, 85, 247, 0.55)",
+        podiumTop: "#6d28d9", podiumSide: "#2e1065",
         badgeBg: "#ec4899", badgeText: "#ffffff",
         titleColor: "#ffffff", subColor: "#e9d5ff",
-        pillBg: "rgba(17, 24, 39, 0.55)", pillBorder: "rgba(236, 72, 153, 0.6)", pillText: "#ffffff"
+        pillBg: "rgba(15, 10, 30, 0.65)", pillBorder: "rgba(236, 72, 153, 0.65)", pillText: "#ffffff"
+      },
+      dark_luxury: {
+        bgTop: "#1c1f2b", bgMid: "#11131a", bgBottom: "#07080b",
+        glow: "rgba(245, 158, 11, 0.25)",
+        rim: "rgba(251, 191, 36, 0.4)",
+        podiumTop: "#33384a", podiumSide: "#161922",
+        badgeBg: "#f59e0b", badgeText: "#090a0f",
+        titleColor: "#ffffff", subColor: "#cbd5e1",
+        pillBg: "rgba(255, 255, 255, 0.07)", pillBorder: "rgba(245, 158, 11, 0.5)", pillText: "#fef3c7"
+      },
+      tech_blue: {
+        bgTop: "#0c4a6e", bgMid: "#0f172a", bgBottom: "#020617",
+        glow: "rgba(56, 189, 248, 0.32)",
+        rim: "rgba(14, 165, 233, 0.5)",
+        podiumTop: "#1e293b", podiumSide: "#090d16",
+        badgeBg: "#38bdf8", badgeText: "#020617",
+        titleColor: "#f8fafc", subColor: "#bae6fd",
+        pillBg: "rgba(2, 6, 23, 0.7)", pillBorder: "rgba(56, 189, 248, 0.55)", pillText: "#e0f2fe"
       },
       eco_minimal: {
-        bgTop: "#f5f2eb", bgBottom: "#e5dec9",
+        bgTop: "#f7f4ed", bgMid: "#ede8dc", bgBottom: "#dfd7c5",
         glow: "rgba(101, 163, 13, 0.16)",
+        rim: "rgba(255, 255, 255, 0.9)",
         podiumTop: "#d6ceb8", podiumSide: "#b8ae93",
         badgeBg: "#3f6212", badgeText: "#ffffff",
         titleColor: "#1c1917", subColor: "#57534e",
-        pillBg: "rgba(255, 255, 255, 0.78)", pillBorder: "rgba(63, 98, 18, 0.35)", pillText: "#1c1917"
+        pillBg: "rgba(255, 255, 255, 0.85)", pillBorder: "rgba(63, 98, 18, 0.35)", pillText: "#1c1917"
       },
-      tech_blue: {
-        bgTop: "#0f172a", bgBottom: "#020617",
-        glow: "rgba(56, 189, 248, 0.28)",
-        podiumTop: "#1e293b", podiumSide: "#0f172a",
-        badgeBg: "#38bdf8", badgeText: "#0f172a",
-        titleColor: "#f8fafc", subColor: "#94a3b8",
-        pillBg: "rgba(15, 23, 42, 0.75)", pillBorder: "rgba(56, 189, 248, 0.5)", pillText: "#e0f2fe"
+      sale_red: {
+        bgTop: "#7f1d1d", bgMid: "#18181b", bgBottom: "#09090b",
+        glow: "rgba(239, 68, 68, 0.35)",
+        rim: "rgba(248, 113, 113, 0.45)",
+        podiumTop: "#27272a", podiumSide: "#09090b",
+        badgeBg: "#ef4444", badgeText: "#ffffff",
+        titleColor: "#ffffff", subColor: "#fecaca",
+        pillBg: "rgba(9, 9, 11, 0.75)", pillBorder: "rgba(239, 68, 68, 0.6)", pillText: "#ffffff"
+      },
+      mint_fresh: {
+        bgTop: "#115e59", bgMid: "#064e3b", bgBottom: "#022c22",
+        glow: "rgba(45, 212, 191, 0.3)",
+        rim: "rgba(94, 234, 212, 0.45)",
+        podiumTop: "#0f766e", podiumSide: "#042f2e",
+        badgeBg: "#2dd4bf", badgeText: "#042f2e",
+        titleColor: "#ffffff", subColor: "#ccfbf1",
+        pillBg: "rgba(2, 44, 34, 0.65)", pillBorder: "rgba(45, 212, 191, 0.55)", pillText: "#f0fdfa"
       }
     };
 
     const PRESETS = {
       thermo: { theme: "dark_luxury", badge: "ХИТ ПРОДАЖ 2026", title: "ТЕРМОКРУЖКА PRO", sub: "Нержавеющая сталь • Вакуумная изоляция", b1: "🔥 Тепло до 12 ч", b2: "💧 100% герметична", b3: "🛡️ Гарантия 2 года • Подарочная коробка" },
-      tech: { theme: "tech_blue", badge: "НОВИНКА • ANC", title: "БЕСПРОВОДНЫЕ НАУШНИКИ", sub: "Активное шумоподавление • Bluetooth 5.4", b1: "🔋 До 36 ч работы", b2: "🎙️ 4 микрофона ENC", b3: "⚡ Быстрая зарядка Type-C за 15 минут" },
+      tech: { theme: "tech_blue", badge: "НОВИНКА • ANC", title: "НАУШНИКИ PRO MAX", sub: "Активное шумоподавление • Bluetooth 5.4", b1: "🔋 До 36 ч работы", b2: "🎙️ 4 микрофона ENC", b3: "⚡ Быстрая зарядка Type-C за 15 минут" },
       cosmetic: { theme: "eco_minimal", badge: "100% ОРГАНИК", title: "СЫВОРОТКА ДЛЯ ЛИЦА", sub: "Гиалуроновая кислота + Витамин С", b1: "🌿 Без парабенов", b2: "💧 Глубокое увлажнение", b3: "✨ Видимый эффект уже через 7 дней" },
       clothes: { theme: "wb_bright", badge: "ТРЕНД СЕЗОНА", title: "ХУДИ ОВЕРСАЙЗ", sub: "Плотный футер 3-нитка • 100% хлопок", b1: "🧶 Не скатывается", b2: "📐 Идеальная посадка", b3: "🚚 Доставка завтра • Все размеры в наличии" }
     };
+
+    function updateProState() {
+      const topBtn = document.getElementById("topProBtn");
+      const mainBtn = document.getElementById("mainActionBtn");
+      const qualityTag = document.getElementById("qualityTag");
+
+      if (isProUnlocked) {
+        topBtn.textContent = "✅ PRO Активен";
+        topBtn.classList.add("unlocked");
+        mainBtn.textContent = "⬇️ Скачать чистую карточку (HD)";
+        mainBtn.classList.add("ready");
+        qualityTag.textContent = "💎 HD без водяного знака";
+        qualityTag.style.color = "#34d399";
+      }
+    }
 
     function roundRect(ctx, x, y, w, h, r) {
       ctx.beginPath();
@@ -388,49 +902,72 @@
     }
 
     function drawCard() {
-      const t = THEMES[document.getElementById("themeSelect").value];
+      const t = THEMES[currentTheme];
       const W = canvas.width;
       const H = canvas.height;
 
+      // 1. Многоступенчатый студийный градиент фона
       const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
       bgGrad.addColorStop(0, t.bgTop);
+      bgGrad.addColorStop(0.55, t.bgMid);
       bgGrad.addColorStop(1, t.bgBottom);
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, W, H);
 
-      const radGrad = ctx.createRadialGradient(W / 2, H * 0.56, 40, W / 2, H * 0.56, 460);
+      // 2. Контровой свет (свечение за товаром)
+      const radGrad = ctx.createRadialGradient(W / 2, H * 0.56, 30, W / 2, H * 0.56, 470);
       radGrad.addColorStop(0, t.glow);
+      radGrad.addColorStop(0.6, t.rim.replace("0.55", "0.12"));
       radGrad.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = radGrad;
       ctx.fillRect(0, 0, W, H);
 
-      const podY = 930;
-      ctx.save();
-      ctx.fillStyle = t.podiumSide;
-      ctx.beginPath();
-      ctx.ellipse(W / 2, podY + 34, 290, 56, 0, 0, Math.PI * 2);
-      ctx.fill();
+      // 3. Подиум или тень
+      const podY = 935;
+      if (podiumStyle === "disc") {
+        ctx.save();
+        ctx.fillStyle = t.podiumSide;
+        ctx.beginPath();
+        ctx.ellipse(W / 2, podY + 34, 295, 58, 0, 0, Math.PI * 2);
+        ctx.fill();
 
-      ctx.fillStyle = t.podiumTop;
-      ctx.beginPath();
-      ctx.ellipse(W / 2, podY, 290, 56, 0, 0, Math.PI * 2);
-      ctx.fill();
+        const podGrad = ctx.createLinearGradient(W / 2 - 295, podY, W / 2 + 295, podY);
+        podGrad.addColorStop(0, t.podiumSide);
+        podGrad.addColorStop(0.5, t.podiumTop);
+        podGrad.addColorStop(1, t.podiumSide);
+        ctx.fillStyle = podGrad;
+        ctx.beginPath();
+        ctx.ellipse(W / 2, podY, 295, 58, 0, 0, Math.PI * 2);
+        ctx.fill();
 
-      const shadowGrad = ctx.createRadialGradient(W / 2, podY, 10, W / 2, podY, 190);
-      shadowGrad.addColorStop(0, "rgba(0,0,0,0.55)");
-      shadowGrad.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = shadowGrad;
-      ctx.beginPath();
-      ctx.ellipse(W / 2, podY, 190, 32, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
+        // Тень от товара на подиуме
+        const shadowGrad = ctx.createRadialGradient(W / 2, podY, 10, W / 2, podY, 195);
+        shadowGrad.addColorStop(0, "rgba(0,0,0,0.6)");
+        shadowGrad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = shadowGrad;
+        ctx.beginPath();
+        ctx.ellipse(W / 2, podY, 195, 34, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else if (podiumStyle === "shadow") {
+        ctx.save();
+        const floatShadow = ctx.createRadialGradient(W / 2, podY + 15, 15, W / 2, podY + 15, 240);
+        floatShadow.addColorStop(0, "rgba(0,0,0,0.65)");
+        floatShadow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = floatShadow;
+        ctx.beginPath();
+        ctx.ellipse(W / 2, podY + 15, 240, 38, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
 
+      // 4. Товар
       const scale = parseFloat(document.getElementById("scaleRange").value);
       const offsetX = parseFloat(document.getElementById("posXRange").value);
       const offsetY = parseFloat(document.getElementById("posYRange").value);
 
       if (productImg) {
-        const maxDim = 560 * scale;
+        const maxDim = 570 * scale;
         const ratio = Math.min(maxDim / productImg.width, maxDim / productImg.height);
         const drawW = productImg.width * ratio;
         const drawH = productImg.height * ratio;
@@ -438,54 +975,60 @@
         const drawY = (H * 0.54 - drawH / 2) + offsetY;
 
         ctx.save();
-        ctx.shadowColor = "rgba(0,0,0,0.45)";
-        ctx.shadowBlur = 35;
-        ctx.shadowOffsetY = 20;
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowBlur = 40;
+        ctx.shadowOffsetY = 22;
         ctx.drawImage(productImg, drawX, drawY, drawW, drawH);
         ctx.restore();
       } else {
         ctx.save();
         ctx.strokeStyle = t.pillBorder;
         ctx.lineWidth = 3;
-        ctx.setLineDash([12, 10]);
-        roundRect(ctx, W / 2 - 150, 440, 300, 380, 28);
+        ctx.setLineDash([14, 10]);
+        roundRect(ctx, W / 2 - 165, 440, 330, 390, 30);
         ctx.stroke();
-        ctx.fillStyle = t.subColor;
-        ctx.font = "700 22px sans-serif";
+
+        ctx.fillStyle = t.titleColor;
+        ctx.font = "800 24px Inter, sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("ЗДЕСЬ БУДЕТ ВАШ ТОВАР", W / 2, 625);
-        ctx.font = "16px sans-serif";
-        ctx.fillText("Нажмите «Выбрать фото» ниже", W / 2, 658);
+        ctx.fillText("МЕСТО ДЛЯ ТОВАРА", W / 2, 620);
+
+        ctx.fillStyle = t.subColor;
+        ctx.font = "500 18px Inter, sans-serif";
+        ctx.fillText("Загрузите фото во вкладке «Товар»", W / 2, 656);
         ctx.restore();
       }
 
+      // 5. Верхний бейдж
       const badgeText = document.getElementById("badgeInput").value.trim();
       if (badgeText) {
-        ctx.font = "800 22px sans-serif";
-        const bw = ctx.measureText(badgeText).width + 48;
+        ctx.font = "800 22px Inter, sans-serif";
+        const bw = ctx.measureText(badgeText).width + 52;
         const bx = (W - bw) / 2;
-        roundRect(ctx, bx, 56, bw, 46, 23);
+        roundRect(ctx, bx, 52, bw, 48, 24);
         ctx.fillStyle = t.badgeBg;
         ctx.fill();
 
         ctx.fillStyle = t.badgeText;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(badgeText, W / 2, 79);
+        ctx.fillText(badgeText, W / 2, 76);
       }
 
+      // 6. Заголовок и подзаголовок
       const title = document.getElementById("titleInput").value.trim();
       ctx.fillStyle = t.titleColor;
-      ctx.font = "900 62px sans-serif";
+      ctx.font = "900 62px Inter, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-      ctx.fillText(title, W / 2, 128, W - 90);
+      ctx.fillText(title, W / 2, 124, W - 80);
 
       const sub = document.getElementById("subInput").value.trim();
       ctx.fillStyle = t.subColor;
-      ctx.font = "500 28px sans-serif";
-      ctx.fillText(sub, W / 2, 206, W - 100);
+      ctx.font = "600 27px Inter, sans-serif";
+      ctx.fillText(sub, W / 2, 202, W - 90);
 
+      // 7. Плашки инфографики
       const b1 = document.getElementById("b1Input").value.trim();
       const b2 = document.getElementById("b2Input").value.trim();
       const b3 = document.getElementById("b3Input").value.trim();
@@ -493,7 +1036,7 @@
       function drawPill(text, x, y, w, h) {
         if (!text) return;
         ctx.save();
-        roundRect(ctx, x, y, w, h, 20);
+        roundRect(ctx, x, y, w, h, 22);
         ctx.fillStyle = t.pillBg;
         ctx.fill();
         ctx.lineWidth = 2;
@@ -501,30 +1044,72 @@
         ctx.stroke();
 
         ctx.fillStyle = t.pillText;
-        ctx.font = "700 26px sans-serif";
+        ctx.font = "700 26px Inter, sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(text, x + w / 2, y + h / 2, w - 30);
+        ctx.fillText(text, x + w / 2, y + h / 2, w - 32);
         ctx.restore();
       }
 
-      drawPill(b1, 60, 275, 375, 68);
-      drawPill(b2, 465, 275, 375, 68);
-      drawPill(b3, 60, 1055, 780, 74);
+      drawPill(b1, 56, 270, 380, 70);
+      drawPill(b2, 464, 270, 380, 70);
+      drawPill(b3, 56, 1056, 788, 76);
 
+      // 8. Водяной знак (только если не оплачено PRO)
       if (!isProUnlocked) {
         ctx.save();
         ctx.translate(W / 2, H / 2);
         ctx.rotate(-Math.PI / 6);
-        ctx.font = "900 50px sans-serif";
-        ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
+        ctx.font = "900 48px Inter, sans-serif";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
         ctx.textAlign = "center";
-        ctx.fillText("MP DESIGN STUDIO", 0, -36);
-        ctx.fillText("DEMO VERSION", 0, 36);
+        ctx.fillText("MP DESIGN STUDIO", 0, -34);
+        ctx.fillText("DEMO PREVIEW", 0, 34);
         ctx.restore();
       }
     }
 
+    function downloadCanvas(filename) {
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    // Переключение вкладок
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+        tg?.HapticFeedback?.selectionChanged();
+      });
+    });
+
+    // Выбор цветовой темы
+    document.querySelectorAll(".theme-card").forEach(card => {
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".theme-card").forEach(c => c.classList.remove("active"));
+        card.classList.add("active");
+        currentTheme = card.dataset.theme;
+        tg?.HapticFeedback?.selectionChanged();
+        drawCard();
+      });
+    });
+
+    // Выбор подиума
+    document.querySelectorAll("#podiumTypeGroup .seg-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#podiumTypeGroup .seg-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        podiumStyle = btn.dataset.podium;
+        tg?.HapticFeedback?.selectionChanged();
+        drawCard();
+      });
+    });
+
+    // Загрузка фото
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -541,11 +1126,12 @@
       reader.readAsDataURL(file);
     });
 
+    // Удаление фона нейросетью
     removeBgBtn.addEventListener("click", async () => {
       if (!rawFile) return;
       removeBgBtn.disabled = true;
       statusBox.style.display = "block";
-      statusBox.textContent = "⏳ Вырезаем фон нейросетью (подождите ~10 сек)...";
+      statusBox.textContent = "⏳ Нейросеть вырезает фон (подождите ~10 сек)...";
       tg?.HapticFeedback?.impactOccurred("medium");
 
       try {
@@ -555,21 +1141,40 @@
         img.onload = () => {
           productImg = img;
           drawCard();
-          statusBox.textContent = "✅ Фон удален! Подправьте масштаб и скачайте.";
+          statusBox.textContent = "✅ Готово! Фон идеально удален.";
           removeBgBtn.disabled = false;
           tg?.HapticFeedback?.notificationOccurred("success");
         };
         img.src = url;
       } catch (err) {
-        statusBox.textContent = "⚠️ Не удалось удалить фон. Попробуйте другое фото.";
+        statusBox.textContent = "⚠️ Не удалось вырезать фон. Попробуйте другое фото.";
         removeBgBtn.disabled = false;
       }
     });
 
-    document.querySelectorAll(".preset-chip").forEach(btn => {
+    // Сброс позиции товара
+    document.getElementById("resetPosBtn").addEventListener("click", () => {
+      document.getElementById("scaleRange").value = 0.85;
+      document.getElementById("posXRange").value = 0;
+      document.getElementById("posYRange").value = 55;
+      updateSliderLabels();
+      drawCard();
+    });
+
+    function updateSliderLabels() {
+      document.getElementById("scaleVal").textContent = Math.round(document.getElementById("scaleRange").value * 100) + "%";
+      document.getElementById("posXVal").textContent = document.getElementById("posXRange").value;
+      document.getElementById("posYVal").textContent = document.getElementById("posYRange").value;
+    }
+
+    // Быстрые пресеты ниш
+    document.querySelectorAll(".chip").forEach(btn => {
       btn.addEventListener("click", () => {
         const p = PRESETS[btn.dataset.preset];
-        document.getElementById("themeSelect").value = p.theme;
+        currentTheme = p.theme;
+        document.querySelectorAll(".theme-card").forEach(c => {
+          c.classList.toggle("active", c.dataset.theme === p.theme);
+        });
         document.getElementById("badgeInput").value = p.badge;
         document.getElementById("titleInput").value = p.title;
         document.getElementById("subInput").value = p.sub;
@@ -581,44 +1186,85 @@
       });
     });
 
+    // Скачивание демо
     document.getElementById("downloadFreeBtn").addEventListener("click", () => {
-      const link = document.createElement("a");
-      link.download = "mp-card-demo.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      tg?.HapticFeedback?.impactOccurred("light");
+      downloadCanvas("mp-card-demo.png");
     });
 
-    // Логика окна оплаты
+    // Модалка оплаты Telegram Stars
     const modal = document.getElementById("paywallModal");
-    const openModal = () => { modal.classList.add("active"); tg?.HapticFeedback?.impactOccurred("medium"); };
-    const closeModal = () => modal.classList.remove("active");
+    const openModal = () => {
+      if (isProUnlocked) {
+        downloadCanvas("mp-card-hd-900x1200.png");
+        return;
+      }
+      modal.classList.add("open");
+      tg?.HapticFeedback?.impactOccurred("medium");
+    };
+    const closeModal = () => modal.classList.remove("open");
 
-    document.getElementById("buyProBtn").addEventListener("click", openModal);
-    document.getElementById("openPaywallTop").addEventListener("click", openModal);
+    document.getElementById("mainActionBtn").addEventListener("click", openModal);
+    document.getElementById("topProBtn").addEventListener("click", openModal);
     document.getElementById("closeModalBtn").addEventListener("click", closeModal);
 
-    document.querySelectorAll(".tariff").forEach(el => {
+    const payStarsBtn = document.getElementById("payStarsBtn");
+
+    document.querySelectorAll(".plan-card").forEach(el => {
       el.addEventListener("click", () => {
-        document.querySelectorAll(".tariff").forEach(t => t.classList.remove("selected"));
+        document.querySelectorAll(".plan-card").forEach(t => t.classList.remove("selected"));
         el.classList.add("selected");
-        selectedPlan = el.dataset.plan;
+        selectedStars = Number(el.dataset.stars);
+        selectedTitle = el.dataset.title;
+        payStarsBtn.textContent = `⭐ Оплатить в 1 клик (${selectedStars} Stars)`;
         tg?.HapticFeedback?.selectionChanged();
       });
     });
 
-    document.getElementById("proceedPayBtn").addEventListener("click", () => {
-      const text = encodeURIComponent(`Здравствуйте! Хочу оформить PRO-доступ в MP Design Studio (${selectedPlan}).`);
-      const url = `https://t.me/${SELLER_USERNAME}?text=${text}`;
-      if (tg) {
-        tg.openTelegramLink(url);
-      } else {
-        window.open(url, "_blank");
+    payStarsBtn.addEventListener("click", async () => {
+      if (!tg || !tg.openInvoice) {
+        alert("Оплата Telegram Stars работает при запуске приложения внутри Telegram.");
+        return;
+      }
+
+      payStarsBtn.disabled = true;
+      payStarsBtn.textContent = "⏳ Создаем счет...";
+
+      try {
+        const res = await fetch(`${PAY_URL}?stars=${selectedStars}&title=${encodeURIComponent(selectedTitle)}`);
+        const data = await res.json();
+
+        if (!data.ok || !data.result) throw new Error("Invoice error");
+
+        tg.openInvoice(data.result, (status) => {
+          payStarsBtn.disabled = false;
+          payStarsBtn.textContent = `⭐ Оплатить в 1 клик (${selectedStars} Stars)`;
+
+          if (status === "paid") {
+            isProUnlocked = true;
+            localStorage.setItem("mp_studio_pro", "true");
+            closeModal();
+            updateProState();
+            drawCard();
+            tg.HapticFeedback?.notificationOccurred("success");
+            setTimeout(() => downloadCanvas("mp-card-hd-900x1200.png"), 350);
+          }
+        });
+      } catch (err) {
+        payStarsBtn.disabled = false;
+        payStarsBtn.textContent = `⭐ Оплатить в 1 клик (${selectedStars} Stars)`;
+        alert("Не удалось открыть счет. Проверьте, что функция netlify/functions/pay.js развернута.");
       }
     });
 
-    ["themeSelect", "badgeInput", "titleInput", "subInput", "b1Input", "b2Input", "b3Input", "scaleRange", "posXRange", "posYRange"]
-      .forEach(id => document.getElementById(id).addEventListener("input", drawCard));
+    ["badgeInput", "titleInput", "subInput", "b1Input", "b2Input", "b3Input", "scaleRange", "posXRange", "posYRange"]
+      .forEach(id => document.getElementById(id).addEventListener("input", () => {
+        updateSliderLabels();
+        drawCard();
+      }));
 
+    updateProState();
+    updateSliderLabels();
     drawCard();
   </script>
 </body>
