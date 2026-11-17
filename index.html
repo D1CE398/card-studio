@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>MP Design Studio AI — 3 Варианта карточек WB & Ozon</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script type="module">
-    import { removeBackground } from "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm";
-    window.neuralRemoveBg = removeBackground;
-  </script>
   <style>
     :root {
       --bg: #090a0f;
@@ -99,7 +95,7 @@
       background: var(--surface-2);
       border: 1px solid var(--border);
       color: var(--muted);
-      padding: 7px 4px;
+      padding: 8px 4px;
       border-radius: 9px;
       font-size: 11px;
       font-weight: 700;
@@ -107,7 +103,7 @@
       text-align: center;
     }
     .var-btn.active {
-      background: rgba(139, 92, 246, 0.22);
+      background: rgba(139, 92, 246, 0.25);
       border-color: #8b5cf6;
       color: #fff;
     }
@@ -453,7 +449,6 @@
   </header>
 
   <section class="stage">
-    <!-- Переключатель 3 сгенерированных вариантов -->
     <div class="variants-bar">
       <button class="var-btn active" type="button" data-var="0">1. Лукбук</button>
       <button class="var-btn" type="button" data-var="1">2. 3D Студия</button>
@@ -482,16 +477,16 @@
       <div class="card-box">
         <div class="section-label">
           <span>Фотография товара</span>
-          <span style="color:#a78bfa;">Авто-кроп + Gemini</span>
+          <span style="color:#a78bfa;">Neural Cutout + AI</span>
         </div>
         <label class="upload-zone" for="fileInput">
           <input type="file" id="fileInput" accept="image/*" />
           <div style="font-size:22px; margin-bottom:4px;">📷</div>
           <div style="font-weight:700; font-size:13px;" id="uploadLabelText">Загрузить фото из галереи</div>
-          <div style="font-size:11px; color:var(--muted); margin-top:2px;">ИИ вырежет фон, уберёт пустые поля и сделает 3 варианта</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Нейросеть сама вырежет фон, обрежет поля и сделает 3 варианта</div>
         </label>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-          <button class="btn btn-ai" id="analyzePhotoBtn" type="button" disabled>🧠 3 новых варианта ИИ</button>
+          <button class="btn btn-ai" id="cutoutAgainBtn" type="button" disabled>✂️ Вырезать фон</button>
           <button class="btn btn-ghost" id="restoreBgBtn" type="button" disabled>↩️ Исходное фото</button>
         </div>
         <div class="ai-status" id="statusBox"></div>
@@ -504,8 +499,8 @@
           <span id="resetPosBtn" style="color:#8b5cf6; cursor:pointer; text-transform:none;">Сбросить</span>
         </div>
         <div class="slider-item">
-          <div class="slider-head"><span>Размер товара (Масштаб)</span><span id="scaleVal">115%</span></div>
-          <input type="range" id="scaleRange" min="0.4" max="2.4" step="0.03" value="1.15" />
+          <div class="slider-head"><span>Размер товара (Масштаб)</span><span id="scaleVal">120%</span></div>
+          <input type="range" id="scaleRange" min="0.4" max="2.4" step="0.03" value="1.20" />
         </div>
         <div class="slider-item">
           <div class="slider-head"><span>Сдвиг влево / вправо</span><span id="posXVal">0</span></div>
@@ -562,12 +557,12 @@
     <!-- Вкладка 3: Тексты, векторные иконки и SEO -->
     <div class="tab-pane" id="tabText">
       <div class="card-box">
-        <div class="section-label">Арт-директор Gemini AI</div>
+        <div class="section-label">Арт-директор ИИ</div>
         <div class="field">
           <span>Название товара (уточните при необходимости)</span>
           <input type="text" id="titleInput" value="БЕСПРОВОДНЫЕ НАУШНИКИ" />
         </div>
-        <button class="btn btn-ai" id="generateAiTextBtn" type="button">✨ Сгенерировать 3 варианта и SEO-описание</button>
+        <button class="btn btn-ai" id="generateAiTextBtn" type="button">✨ Обновить 3 варианта и SEO-описание</button>
         <div class="ai-status" id="aiTextStatus"></div>
       </div>
 
@@ -580,7 +575,7 @@
           <span>Блок 1 (Иконка + Подпись)</span>
           <div class="icon-row">
             <select id="icon1Select"></select>
-            <input type="text" id="label1Input" value="ДО 36 ЧАСОВ РАБОТЫ" />
+            <input type="text" id="label1Input" value="ДО 36 Ч РАБОТЫ" />
           </div>
         </div>
 
@@ -588,7 +583,7 @@
           <span>Блок 2 (Иконка + Подпись)</span>
           <div class="icon-row">
             <select id="icon2Select"></select>
-            <input type="text" id="label2Input" value="ШУМОПОДАВЛЕНИЕ ANC" />
+            <input type="text" id="label2Input" value="ШУМОПОДАВЛЕНИЕ" />
           </div>
         </div>
 
@@ -596,7 +591,7 @@
           <span>Блок 3 (Иконка + Подпись)</span>
           <div class="icon-row">
             <select id="icon3Select"></select>
-            <input type="text" id="label3Input" value="БЫСТРАЯ ЗАРЯДКА TYPE-C" />
+            <input type="text" id="label3Input" value="ЛЁГКИЙ КОРПУС" />
           </div>
         </div>
       </div>
@@ -606,7 +601,7 @@
           <span>SEO-описание для карточки WB / Ozon</span>
           <span id="copyDescBtn" style="color:#38bdf8; cursor:pointer; text-transform:none;">📋 Скопировать</span>
         </div>
-        <textarea id="seoDescInput">Беспроводные наушники с системой активного шумоподавления ANC и чистым объёмным звучанием. Компактный зарядный кейс обеспечивает до 36 часов автономной работы, а эргономичная посадка гарантирует комфорт в течение всего дня. Мгновенное подключение по Bluetooth 5.4 ко всем смартфонам.</textarea>
+        <textarea id="seoDescInput">Беспроводные наушники с системой активного шумоподавления ANC и чистым объёмным звучанием. Компактный зарядный кейс обеспечивает до 36 часов автономной работы, а эргономичная посадка гарантирует комфорт в течение всего дня.</textarea>
       </div>
     </div>
   </div>
@@ -684,7 +679,7 @@
     const canvas = document.getElementById("cardCanvas");
     const ctx = canvas.getContext("2d");
     const fileInput = document.getElementById("fileInput");
-    const analyzePhotoBtn = document.getElementById("analyzePhotoBtn");
+    const cutoutAgainBtn = document.getElementById("cutoutAgainBtn");
     const restoreBgBtn = document.getElementById("restoreBgBtn");
     const statusBox = document.getElementById("statusBox");
     const verdictBox = document.getElementById("verdictBox");
@@ -695,8 +690,16 @@
     let currentTheme = "clean_light";
     let currentLayout = "grid_bottom";
     let activeVariantIndex = 0;
+    let cachedRemoveBgFn = null;
 
-    // 3 варианта дизайна (обновляются нейросетью или переключаются пользователем)
+    // Динамическая загрузка нейросети вырезки фона с гарантированным ожиданием
+    async function getNeuralBgRemover() {
+      if (cachedRemoveBgFn) return cachedRemoveBgFn;
+      const mod = await import("https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm");
+      cachedRemoveBgFn = mod.removeBackground;
+      return cachedRemoveBgFn;
+    }
+
     let variantsData = [
       {
         name: "1. Лукбук",
@@ -812,7 +815,6 @@
       }
     };
 
-    // АВТО-КРОП ПРОЗРАЧНЫХ ПОЛЕЙ: вырезает пустое место вокруг объекта, чтобы товар был крупным!
     function trimTransparentImage(img) {
       return new Promise((resolve) => {
         const w = img.naturalWidth || img.width;
@@ -990,7 +992,6 @@
       const W = canvas.width;
       const H = canvas.height;
 
-      // 1. Студийный фон + объёмный световой ореол за товаром
       const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
       bgGrad.addColorStop(0, t.bgTop);
       bgGrad.addColorStop(0.65, t.bgMid);
@@ -1004,7 +1005,6 @@
       ctx.fillStyle = spotGrad;
       ctx.fillRect(0, 0, W, H);
 
-      // 2. Фоновая гигантская типографика
       const bgWord = document.getElementById("bgWordInput").value.trim().toUpperCase();
       if (bgWord) {
         ctx.save();
@@ -1028,7 +1028,6 @@
         ctx.restore();
       }
 
-      // 3. 3D-подиум (для варианта "podium_cards")
       if (currentLayout === "podium_cards") {
         const podY = 825;
         ctx.save();
@@ -1048,7 +1047,6 @@
         ctx.restore();
       }
 
-      // 4. Расчёт координат и размера товара + контактная тень
       const shadowIntensity = Number(document.getElementById("shadowRange").value) / 100;
       const scale = parseFloat(document.getElementById("scaleRange").value);
       const offsetX = parseFloat(document.getElementById("posXRange").value);
@@ -1114,7 +1112,6 @@
       const label3 = document.getElementById("label3Input").value.trim().toUpperCase();
       const subText = document.getElementById("subInput").value.trim().toUpperCase();
 
-      // 5. КОМПОЗИЦИЯ 1: Лукбук сетка снизу в рамке
       if (currentLayout === "grid_bottom") {
         const iconY = 955;
         const textY = 1042;
@@ -1158,10 +1155,8 @@
         ctx.restore();
       }
 
-      // 6. КОМПОЗИЦИЯ 2: 3D Подиум + Плашки с векторными иконками
       if (currentLayout === "podium_cards") {
         ctx.save();
-        // Подзаголовок под верхним фоновым словом
         if (subText) {
           ctx.fillStyle = t.mutedInk;
           ctx.font = "700 24px sans-serif";
@@ -1191,12 +1186,10 @@
         ctx.restore();
       }
 
-      // 7. КОМПОЗИЦИЯ 3: Умные выноски со стрелками (тянутся точно к границам товара!)
       if (currentLayout === "callouts_arrows") {
         ctx.save();
         ctx.fillStyle = t.ink;
 
-        // Правая выноска + стрелка к правому верхнему краю товара
         const targetRightX = Math.min(W - 190, prodBox.x + prodBox.w * 0.88);
         const targetRightY = Math.max(240, prodBox.y + prodBox.h * 0.25);
         drawVectorIcon(icon1, 765, 255, 68, t.ink);
@@ -1205,7 +1198,6 @@
         ctx.fillText(label1, 765, 314, 210);
         drawCurvedArrow(705, 250, (705 + targetRightX) / 2, 225, targetRightX, targetRightY, t.ink);
 
-        // Левая выноска + стрелка к левому нижнему краю товара
         const targetLeftX = Math.max(190, prodBox.x + prodBox.w * 0.16);
         const targetLeftY = Math.min(820, prodBox.y + prodBox.h * 0.72);
         ctx.textAlign = "left";
@@ -1213,7 +1205,6 @@
         ctx.fillText(label2, 72, 855, 360);
         drawCurvedArrow(195, 825, 195, (825 + targetLeftY) / 2, targetLeftX, targetLeftY, t.ink);
 
-        // Нижний крупный слоган и подпись
         ctx.font = "800 38px -apple-system, BlinkMacSystemFont, sans-serif";
         ctx.fillText(subText || label3, 72, 995, W - 144);
         if (label3 && subText && label3 !== subText) {
@@ -1224,7 +1215,6 @@
         ctx.restore();
       }
 
-      // 8. Водяной знак (только если нет HD-кредитов)
       if (credits <= 0) {
         ctx.save();
         ctx.translate(W / 2, H / 2);
@@ -1289,7 +1279,6 @@
       document.getElementById("saveModal").classList.remove("open");
     });
 
-    // Переключение 3 вариантов дизайна
     document.querySelectorAll(".var-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         saveCurrentToVariant();
@@ -1322,38 +1311,39 @@
       });
     });
 
-    async function smartNeuralCutout(img, rawFile) {
+    // ГАРАНТИРОВАННОЕ УДАЛЕНИЕ ФОНА С ОЖИДАНИЕМ ЗАГРУЗКИ МОДУЛЯ
+    async function smartNeuralCutout(rawFile) {
+      if (!rawFile) return;
+      cutoutAgainBtn.disabled = true;
       statusBox.style.display = "block";
-      statusBox.textContent = "✂️ Нейросеть вырезает товар со сложного фона...";
+      statusBox.textContent = "⏳ Загружаем нейросеть удаления фона...";
 
       try {
-        if (window.neuralRemoveBg && rawFile) {
-          const resultBlob = await window.neuralRemoveBg(rawFile, {
-            progress: (key, current, total) => {
-              if (total > 0) {
-                const pct = Math.round((current / total) * 100);
-                statusBox.textContent = `✂️ Нейросеть удаляет фон: ${pct}%...`;
-              }
+        const removeBg = await getNeuralBgRemover();
+        statusBox.textContent = "✂️ Нейросеть вырезает товар с фона...";
+
+        const resultBlob = await removeBg(rawFile, {
+          progress: (key, current, total) => {
+            if (total > 0) {
+              const pct = Math.round((current / total) * 100);
+              statusBox.textContent = `✂️ Нейросеть удаляет фон: ${pct}%...`;
             }
-          });
+          }
+        });
 
-          const url = URL.createObjectURL(resultBlob);
-          const cleanImg = new Image();
-          cleanImg.onload = async () => {
-            // Автоматически обрезаем лишние прозрачные поля вокруг товара!
-            productImg = await trimTransparentImage(cleanImg);
-            statusBox.textContent = "✅ Фон удалён, товар отмасштабирован по центру! Переключайте 3 варианта над карточкой.";
-            drawCard();
-          };
-          cleanImg.src = url;
-          return;
-        }
+        const url = URL.createObjectURL(resultBlob);
+        const cleanImg = new Image();
+        cleanImg.onload = async () => {
+          productImg = await trimTransparentImage(cleanImg);
+          statusBox.textContent = "✅ Фон чисто удалён! Переключайте 3 варианта дизайна над карточкой.";
+          cutoutAgainBtn.disabled = false;
+          drawCard();
+        };
+        cleanImg.src = url;
       } catch (err) {
-        console.warn("Neural BG fallback:", err);
+        cutoutAgainBtn.disabled = false;
+        statusBox.textContent = "⚠️ Ошибка вырезки фона (" + err.message + "). Нажмите «✂️ Вырезать фон» ещё раз.";
       }
-
-      statusBox.textContent = "✅ Фото загружено.";
-      drawCard();
     }
 
     function getThumbBase64(img) {
@@ -1369,11 +1359,10 @@
     }
 
     async function callGeminiAI(withPhoto) {
-      analyzePhotoBtn.disabled = true;
       document.getElementById("generateAiTextBtn").disabled = true;
       const aiTextStatus = document.getElementById("aiTextStatus");
       aiTextStatus.style.display = "block";
-      aiTextStatus.textContent = "🧠 Арт-директор Gemini создаёт 3 варианта дизайна и проверяет композицию...";
+      aiTextStatus.textContent = "🧠 Арт-директор ИИ создаёт 3 варианта дизайна и SEO-описание...";
 
       const titleVal = document.getElementById("titleInput").value.trim();
       const payload = {
@@ -1391,7 +1380,7 @@
         const result = await res.json();
 
         if (!result.ok || !result.data) {
-          throw new Error(result.error || "Ошибка ответа Gemini");
+          throw new Error(result.error || "Ошибка ответа сервера");
         }
 
         const aiData = result.data;
@@ -1416,11 +1405,10 @@
           verdictBox.textContent = "🎨 Вердикт арт-директора: " + aiData.qualityVerdict;
         }
 
-        aiTextStatus.textContent = "✅ Готово! Сгенерировано 3 варианта дизайна — переключайте их кнопками над карточкой.";
+        aiTextStatus.textContent = `✅ Готово (${result.model || "AI"}): 3 варианта дизайна и SEO-описание обновлены!`;
       } catch (err) {
         aiTextStatus.textContent = "⚠️ " + err.message;
       } finally {
-        if (originalImg) analyzePhotoBtn.disabled = false;
         document.getElementById("generateAiTextBtn").disabled = false;
       }
     }
@@ -1437,10 +1425,10 @@
         img.onload = () => {
           originalImg = img;
           productImg = img;
-          analyzePhotoBtn.disabled = false;
+          cutoutAgainBtn.disabled = false;
           restoreBgBtn.disabled = false;
           drawCard();
-          smartNeuralCutout(img, file);
+          smartNeuralCutout(file);
           callGeminiAI(true);
         };
         img.src = ev.target.result;
@@ -1448,8 +1436,8 @@
       reader.readAsDataURL(file);
     });
 
-    analyzePhotoBtn.addEventListener("click", () => {
-      callGeminiAI(true);
+    cutoutAgainBtn.addEventListener("click", () => {
+      if (originalFile) smartNeuralCutout(originalFile);
     });
 
     restoreBgBtn.addEventListener("click", () => {
@@ -1477,7 +1465,7 @@
     });
 
     document.getElementById("resetPosBtn").addEventListener("click", () => {
-      document.getElementById("scaleRange").value = 1.15;
+      document.getElementById("scaleRange").value = 1.20;
       document.getElementById("posXRange").value = 0;
       document.getElementById("posYRange").value = -15;
       updateSliderLabels();
