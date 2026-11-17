@@ -13,10 +13,18 @@ export async function handler(event) {
   try {
     const body = JSON.parse(event.body || "{}");
 
-    // 1. VISION AI ЧЕРЕЗ GEMINI 3.8 FLASH (распознавание фото + подбор иконок и SEO-описания)
+    // 1. VISION AI ЧЕРЕЗ GEMINI (с автоматическим перебором доступных моделей)
     if (body.action === "analyze_product") {
-      const apiKey = process.env.GEMINI_API_KEY || "";
-      const prompt = `Ты топ-дизайнер карточек Wildberries и Ozon. Посмотри на фото товара (и учти подсказку названия, если она есть: "${body.title || ""}"). Определи, что это за товар, и придумай продающую инфографику и SEO-описание на русском языке.
+      const apiKey = (process.env.GEMINI_API_KEY || "").trim();
+      if (!apiKey) {
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ ok: false, error: "Пустой GEMINI_API_KEY в настройках Netlify" })
+        };
+      }
+
+      const prompt = `Ты топ-дизайнер карточек Wildberries и Ozon. Посмотри на фото товара (и учти подсказку названия: "${body.title || ""}"). Определи, что это за товар, и придумай продающую инфографику и SEO-описание на русском языке.
 Верни СТРОГО валидный JSON без markdown с полями:
 - "theme": выбери лучшую тему из ["wb_bright", "dark_luxury", "tech_blue", "eco_minimal", "sale_red", "mint_fresh"]
 - "badge": стикер капсом до 18 символов (например "ХИТ СЕЗОНА 2026")
@@ -33,23 +41,41 @@ export async function handler(event) {
         parts.push({ inline_data: { mime_type: "image/jpeg", data: base64Data } });
       }
 
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const res = await fetch(geminiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: { responseMimeType: "application/json" }
-        })
-      });
+      // Пробуем актуальные модели по очереди, пока одна не ответит успешно
+      const models = ["gemini-3.8-flash", "gemini-3.0-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+      let lastError = "Неизвестная ошибка Gemini";
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message || "Gemini API error");
+      for (const model of models) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: { responseMimeType: "application/json" }
+          })
+        });
 
-      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-      const parsed = JSON.parse(rawText);
+        const data = await res.json();
+        if (res.ok && data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+          const rawText = data.candidates[0].content.parts[0].text;
+          const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify({ ok: true, model, data: JSON.parse(jsonMatch[0]) })
+            };
+          }
+        }
+        lastError = data?.error?.message || `HTTP ${res.status} (${model})`;
+      }
 
-      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, data: parsed }) };
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ ok: false, error: lastError })
+      };
     }
 
     // 2. ОТПРАВКА ГОТОВОЙ КАРТОЧКИ ПРЯМО В ЧАТ TELEGRAM
@@ -72,6 +98,6 @@ export async function handler(event) {
 
     return { statusCode: 400, headers, body: JSON.stringify({ ok: false, error: "Unknown action" }) };
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ ok: false, error: err.message }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: false, error: err.message }) };
   }
 }
