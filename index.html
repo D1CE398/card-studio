@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MP Card Studio — Генератор карточек WB / Ozon</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #181b22;
+      --border: #2a2f3d;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --success: #10b981;
+    }
+
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 400px;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .brand h1 { font-size: 18px; margin: 0; }
+    .badge-mvp {
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    input[type="text"], select {
+      background: #0f1115;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+    input[type="text"]:focus, select:focus { border-color: var(--accent); }
+
+    .upload-box {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      background: rgba(255,255,255,0.02);
+    }
+    .upload-box:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.06); }
+    .upload-box input { display: none; }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: #262b38; }
+    .btn-secondary:hover { background: #323849; }
+    .btn-pro { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+
+    .status {
+      font-size: 13px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(99, 102, 241, 0.12);
+      color: #c7d2fe;
+      display: none;
+    }
+
+    .sliders { display: flex; flex-direction: column; gap: 8px; background: #12151b; padding: 12px; border-radius: 10px; border: 1px solid var(--border); }
+    .slider-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); }
+    input[type="range"] { width: 62%; accent-color: var(--accent); }
+
+    .preview-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      gap: 16px;
+    }
+
+    canvas {
+      max-height: 82vh;
+      width: auto;
+      border-radius: 14px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);
+      background: #1f2430;
+    }
+
+    .mode-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel);
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      canvas { max-width: 92vw; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="brand">
+      <h1>MP Card Studio</h1>
+      <span class="badge-mvp">MVP • 900×1200</span>
+    </div>
+
+    <div class="group">
+      <label>1. Фото товара (любой фон)</label>
+      <label class="upload-box" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" />
+        <div style="font-weight:600; margin-bottom:4px;">📁 Нажмите, чтобы загрузить фото</div>
+        <div style="font-size:12px; color:var(--muted);">JPG, PNG, WEBP — фон вырежется сам</div>
+      </label>
+      <button class="btn btn-secondary" id="removeBgBtn" disabled>✨ Удалить фон нейросетью (0 ₽)</button>
+      <div class="status" id="statusBox"></div>
+    </div>
+
+    <div class="group">
+      <label>2. Айдентика / Стиль карточки</label>
+      <select id="themeSelect">
+        <option value="dark_luxury">Премиум Тёмный (Золото / Графит)</option>
+        <option value="wb_bright">Яркий Маркетплейс (Фиолет / Неон)</option>
+        <option value="eco_minimal">Эко / Минимализм (Беж / Олива)</option>
+        <option value="tech_blue">Техно / Гаджеты (Синий / Кибер)</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <label>3. Тексты и УТП (Инфографика)</label>
+      <input type="text" id="badgeInput" value="ХИТ ПРОДАЖ 2026" placeholder="Бейдж сверху" />
+      <input type="text" id="titleInput" value="ТЕРМОКРУЖКА PRO" placeholder="Главный заголовок" />
+      <input type="text" id="subInput" value="Нержавеющая сталь • Вакуумная изоляция" placeholder="Подзаголовок" />
+      <div class="row-2">
+        <input type="text" id="b1Input" value="🔥 Тепло до 12 ч" placeholder="Плашка 1" />
+        <input type="text" id="b2Input" value="💧 100% герметична" placeholder="Плашка 2" />
+      </div>
+      <input type="text" id="b3Input" value="🛡️ Гарантия 2 года • Подарочная коробка" placeholder="Нижняя плашка" />
+    </div>
+
+    <div class="group">
+      <label>4. Позиция и масштаб товара</label>
+      <div class="sliders">
+        <div class="slider-row"><span>Масштаб</span><input type="range" id="scaleRange" min="0.3" max="1.6" step="0.02" value="0.85" /></div>
+        <div class="slider-row"><span>Сдвиг X</span><input type="range" id="posXRange" min="-250" max="250" step="5" value="0" /></div>
+        <div class="slider-row"><span>Сдвиг Y</span><input type="range" id="posYRange" min="-250" max="250" step="5" value="60" /></div>
+      </div>
+    </div>
+
+    <button class="btn btn-pro" id="downloadBtn">⬇️ Скачать готовую карточку (PNG)</button>
+  </div>
+
+  <div class="preview-area">
+    <div class="mode-bar">
+      <span>Режим проверки монетизации:</span>
+      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; text-transform:none; color:var(--text);">
+        <input type="checkbox" id="watermarkToggle" checked />
+        Водяной знак (Free-тариф)
+      </label>
+    </div>
+    <canvas id="cardCanvas" width="900" height="1200"></canvas>
+  </div>
+
+  <script type="module">
+    import { removeBackground } from "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm";
+
+    const canvas = document.getElementById("cardCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const fileInput = document.getElementById("fileInput");
+    const removeBgBtn = document.getElementById("removeBgBtn");
+    const statusBox = document.getElementById("statusBox");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    const inputs = [
+      "themeSelect", "badgeInput", "titleInput", "subInput",
+      "b1Input", "b2Input", "b3Input", "scaleRange", "posXRange", "posYRange", "watermarkToggle"
+    ].map(id => document.getElementById(id));
+
+    let rawFile = null;
+    let productImg = null;
+
+    const THEMES = {
+      dark_luxury: {
+        bgTop: "#14161d", bgBottom: "#090a0e",
+        glow: "rgba(245, 158, 11, 0.22)",
+        podiumTop: "#2b2f3c", podiumSide: "#171922",
+        badgeBg: "#f59e0b", badgeText: "#111827",
+        titleColor: "#ffffff", subColor: "#d1d5db",
+        pillBg: "rgba(255, 255, 255, 0.08)", pillBorder: "rgba(245, 158, 11, 0.45)", pillText: "#fef3c7"
+      },
+      wb_bright: {
+        bgTop: "#4c1d95", bgBottom: "#1e1b4b",
+        glow: "rgba(236, 72, 153, 0.35)",
+        podiumTop: "#7c3aed", podiumSide: "#3b0764",
+        badgeBg: "#ec4899", badgeText: "#ffffff",
+        titleColor: "#ffffff", subColor: "#e9d5ff",
+        pillBg: "rgba(17, 24, 39, 0.55)", pillBorder: "rgba(236, 72, 153, 0.6)", pillText: "#ffffff"
+      },
+      eco_minimal: {
+        bgTop: "#f5f2eb", bgBottom: "#e5dec9",
+        glow: "rgba(101, 163, 13, 0.16)",
+        podiumTop: "#d6ceb8", podiumSide: "#b8ae93",
+        badgeBg: "#3f6212", badgeText: "#ffffff",
+        titleColor: "#1c1917", subColor: "#57534e",
+        pillBg: "rgba(255, 255, 255, 0.78)", pillBorder: "rgba(63, 98, 18, 0.35)", pillText: "#1c1917"
+      },
+      tech_blue: {
+        bgTop: "#0f172a", bgBottom: "#020617",
+        glow: "rgba(56, 189, 248, 0.28)",
+        podiumTop: "#1e293b", podiumSide: "#0f172a",
+        badgeBg: "#38bdf8", badgeText: "#0f172a",
+        titleColor: "#f8fafc", subColor: "#94a3b8",
+        pillBg: "rgba(15, 23, 42, 0.75)", pillBorder: "rgba(56, 189, 248, 0.5)", pillText: "#e0f2fe"
+      }
+    };
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function drawCard() {
+      const t = THEMES[document.getElementById("themeSelect").value];
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // 1. Фон с градиентом
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+      bgGrad.addColorStop(0, t.bgTop);
+      bgGrad.addColorStop(1, t.bgBottom);
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // 2. Студийное свечение за товаром
+      const radGrad = ctx.createRadialGradient(W / 2, H * 0.56, 40, W / 2, H * 0.56, 460);
+      radGrad.addColorStop(0, t.glow);
+      radGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = radGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // 3. Подиум под товаром
+      const podY = 930;
+      ctx.save();
+      ctx.fillStyle = t.podiumSide;
+      ctx.beginPath();
+      ctx.ellipse(W / 2, podY + 34, 290, 56, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = t.podiumTop;
+      ctx.beginPath();
+      ctx.ellipse(W / 2, podY, 290, 56, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Контактная тень на подиуме
+      const shadowGrad = ctx.createRadialGradient(W / 2, podY, 10, W / 2, podY, 190);
+      shadowGrad.addColorStop(0, "rgba(0,0,0,0.55)");
+      shadowGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = shadowGrad;
+      ctx.beginPath();
+      ctx.ellipse(W / 2, podY, 190, 32, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // 4. Отрисовка товара (или заглушки, если фото еще не загружено)
+      const scale = parseFloat(document.getElementById("scaleRange").value);
+      const offsetX = parseFloat(document.getElementById("posXRange").value);
+      const offsetY = parseFloat(document.getElementById("posYRange").value);
+
+      if (productImg) {
+        const maxDim = 560 * scale;
+        const ratio = Math.min(maxDim / productImg.width, maxDim / productImg.height);
+        const drawW = productImg.width * ratio;
+        const drawH = productImg.height * ratio;
+        const drawX = (W - drawW) / 2 + offsetX;
+        const drawY = (H * 0.54 - drawH / 2) + offsetY;
+
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.45)";
+        ctx.shadowBlur = 35;
+        ctx.shadowOffsetY = 20;
+        ctx.drawImage(productImg, drawX, drawY, drawW, drawH);
+        ctx.restore();
+      } else {
+        ctx.save();
+        ctx.strokeStyle = t.pillBorder;
+        ctx.lineWidth = 3;
+        ctx.setLineDash([12, 10]);
+        roundRect(ctx, W / 2 - 150, 440, 300, 380, 28);
+        ctx.stroke();
+        ctx.fillStyle = t.subColor;
+        ctx.font = "600 22px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("ЗДЕСЬ БУДЕТ ВАШ ТОВАР", W / 2, 625);
+        ctx.font = "16px sans-serif";
+        ctx.fillText("Загрузите фото слева", W / 2, 658);
+        ctx.restore();
+      }
+
+      // 5. Верхний бейдж
+      const badgeText = document.getElementById("badgeInput").value.trim();
+      if (badgeText) {
+        ctx.font = "800 22px sans-serif";
+        const bw = ctx.measureText(badgeText).width + 48;
+        const bx = (W - bw) / 2;
+        roundRect(ctx, bx, 56, bw, 46, 23);
+        ctx.fillStyle = t.badgeBg;
+        ctx.fill();
+
+        ctx.fillStyle = t.badgeText;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(badgeText, W / 2, 79);
+      }
+
+      // 6. Главный заголовок и подзаголовок
+      const title = document.getElementById("titleInput").value.trim();
+      ctx.fillStyle = t.titleColor;
+      ctx.font = "900 62px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText(title, W / 2, 128, W - 90);
+
+      const sub = document.getElementById("subInput").value.trim();
+      ctx.fillStyle = t.subColor;
+      ctx.font = "500 28px sans-serif";
+      ctx.fillText(sub, W / 2, 206, W - 100);
+
+      // 7. Плашки преимуществ (УТП)
+      const b1 = document.getElementById("b1Input").value.trim();
+      const b2 = document.getElementById("b2Input").value.trim();
+      const b3 = document.getElementById("b3Input").value.trim();
+
+      function drawPill(text, x, y, w, h) {
+        if (!text) return;
+        ctx.save();
+        roundRect(ctx, x, y, w, h, 20);
+        ctx.fillStyle = t.pillBg;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = t.pillBorder;
+        ctx.stroke();
+
+        ctx.fillStyle = t.pillText;
+        ctx.font = "700 26px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, x + w / 2, y + h / 2, w - 30);
+        ctx.restore();
+      }
+
+      drawPill(b1, 60, 275, 375, 68);
+      drawPill(b2, 465, 275, 375, 68);
+      drawPill(b3, 60, 1055, 780, 74);
+
+      // 8. Водяной знак (для монетизации)
+      if (document.getElementById("watermarkToggle").checked) {
+        ctx.save();
+        ctx.translate(W / 2, H / 2);
+        ctx.rotate(-Math.PI / 6);
+        ctx.font = "900 54px sans-serif";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
+        ctx.textAlign = "center";
+        ctx.fillText("MP CARD STUDIO • DEMO", 0, -40);
+        ctx.fillText("СНЯТЬ ЗНАК — 290 ₽", 0, 40);
+        ctx.restore();
+      }
+    }
+
+    // Загрузка файла
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      rawFile = file;
+      removeBgBtn.disabled = false;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          productImg = img;
+          drawCard();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Удаление фона нейросетью в браузере
+    removeBgBtn.addEventListener("click", async () => {
+      if (!rawFile) return;
+      removeBgBtn.disabled = true;
+      statusBox.style.display = "block";
+      statusBox.textContent = "⏳ Скачиваю модель и вырезаю фон (первый раз ~10–15 сек)...";
+
+      try {
+        const blob = await removeBackground(rawFile);
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          productImg = img;
+          drawCard();
+          statusBox.textContent = "✅ Фон удален! Подправьте масштаб и скачайте карточку.";
+          removeBgBtn.disabled = false;
+        };
+        img.src = url;
+      } catch (err) {
+        statusBox.textContent = "⚠️ Ошибка при удалении фона (проверьте интернет или откройте через локальный сервер).";
+        removeBgBtn.disabled = false;
+        console.error(err);
+      }
+    });
+
+    // Скачивание PNG
+    downloadBtn.addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "marketplace-card-900x1200.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+
+    inputs.forEach(el => el.addEventListener("input", drawCard));
+    drawCard();
+  </script>
+</body>
+</html>
