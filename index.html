@@ -32,7 +32,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      padding-bottom: 130px;
+      padding-bottom: 165px;
     }
 
     .header {
@@ -277,7 +277,7 @@
 
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field span { font-size: 11px; color: var(--muted); font-weight: 600; }
-    input[type="text"] {
+    input[type="text"], textarea {
       background: var(--bg);
       border: 1px solid var(--border);
       color: #fff;
@@ -287,7 +287,12 @@
       outline: none;
       width: 100%;
     }
-    input[type="text"]:focus { border-color: #8b5cf6; }
+    textarea {
+      resize: vertical;
+      min-height: 92px;
+      line-height: 1.45;
+    }
+    input[type="text"]:focus, textarea:focus { border-color: #8b5cf6; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     .bottom-dock {
@@ -341,7 +346,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.92);
       display: none;
       align-items: flex-end;
       justify-content: center;
@@ -353,7 +358,7 @@
       background: var(--surface);
       border-top: 1px solid rgba(255,255,255,0.16);
       border-radius: 22px 22px 0 0;
-      padding: 20px 16px 64px;
+      padding: 20px 16px 68px;
       width: 100%;
       max-width: 480px;
       display: flex;
@@ -385,6 +390,27 @@
       padding: 2px 7px;
       border-radius: 99px;
     }
+
+    .save-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 10, 15, 0.97);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10001;
+      gap: 14px;
+    }
+    .save-modal.open { display: flex; }
+    .save-modal img {
+      max-height: 62vh;
+      max-width: 90vw;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
   </style>
 </head>
 <body>
@@ -413,29 +439,30 @@
   <nav class="tabs-bar">
     <button class="tab-btn active" type="button" data-tab="tabProduct">📸 Товар</button>
     <button class="tab-btn" type="button" data-tab="tabStyle">🎨 AI-Стиль</button>
-    <button class="tab-btn" type="button" data-tab="tabText">✍️ AI-Тексты</button>
+    <button class="tab-btn" type="button" data-tab="tabText">✍️ Тексты & SEO</button>
   </nav>
 
   <div class="panel-container">
+    <!-- Вкладка 1: Товар -->
     <div class="tab-pane active" id="tabProduct">
       <div class="card-box">
         <div class="section-label">
           <span>Фотография товара</span>
-          <span style="color:#a78bfa;">Авто-вырезка</span>
+          <span style="color:#a78bfa;">Vision AI + Вырезка</span>
         </div>
         <label class="upload-zone" for="fileInput">
           <input type="file" id="fileInput" accept="image/*" />
           <div style="font-size:22px; margin-bottom:4px;">📷</div>
           <div style="font-weight:700; font-size:13px;" id="uploadLabelText">Загрузить фото из галереи</div>
-          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Светлый или однотонный фон удалится в 1 клик</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">ИИ сам определит товар, вырежет фон и заполнит карточку</div>
         </label>
         <div class="grid-2">
-          <button class="btn btn-ai" id="removeBgBtn" type="button" disabled>✂️ Вырезать фон</button>
-          <button class="btn btn-ghost" id="restoreBgBtn" type="button" disabled>↩️ Вернуть</button>
+          <button class="btn btn-ai" id="analyzePhotoBtn" type="button" disabled>🧠 Распознать заново</button>
+          <button class="btn btn-ghost" id="restoreBgBtn" type="button" disabled>↩️ Исходное фото</button>
         </div>
         <div class="slider-item" id="toleranceBox" style="display:none;">
-          <div class="slider-head"><span>Точность обрезки краев</span><span id="tolVal">48</span></div>
-          <input type="range" id="tolRange" min="15" max="110" step="3" value="48" />
+          <div class="slider-head"><span>Точность обрезки контура</span><span id="tolVal">36</span></div>
+          <input type="range" id="tolRange" min="10" max="95" step="2" value="36" />
         </div>
         <div class="ai-status" id="statusBox"></div>
       </div>
@@ -460,11 +487,12 @@
       </div>
     </div>
 
+    <!-- Вкладка 2: AI-Стиль -->
     <div class="tab-pane" id="tabStyle">
       <div class="card-box">
         <div class="section-label">
-          <span>Студийный стиль и промпт</span>
-          <span style="color:#38bdf8;">FLUX AI</span>
+          <span>Студийная сцена и освещение</span>
+          <span style="color:#38bdf8;">3D RENDER</span>
         </div>
         <div class="themes-grid">
           <div class="theme-card active" data-theme="wb_bright">
@@ -493,9 +521,7 @@
           </div>
         </div>
 
-        <button class="btn btn-cyan" id="generateAiBgBtn" type="button">✨ Сгенерировать 3D-фон нейросетью</button>
-        <button class="btn btn-ghost" id="clearAiBgBtn" type="button" style="display:none;">🔄 Вернуть градиентный фон</button>
-        <div class="ai-status" id="aiBgStatus"></div>
+        <button class="btn btn-cyan" id="generateAiBgBtn" type="button">✨ Сгенерировать новый 3D-свет и боке</button>
       </div>
 
       <div class="card-box">
@@ -508,14 +534,15 @@
       </div>
     </div>
 
+    <!-- Вкладка 3: AI-Тексты, иконки и SEO-описание -->
     <div class="tab-pane" id="tabText">
       <div class="card-box">
-        <div class="section-label">Нейро-копирайтер для маркетплейсов</div>
+        <div class="section-label">Нейро-копирайтер и подбор иконок</div>
         <div class="field">
-          <span>Введите название вашего товара (например: «Кроссовки мужские» или «Крем для рук»)</span>
+          <span>Название товара (определяется по фото или вводится вручную)</span>
           <input type="text" id="titleInput" value="ТЕРМОКРУЖКА PRO" />
         </div>
-        <button class="btn btn-ai" id="generateAiTextBtn" type="button">✨ Придумать продающие плашки ИИ</button>
+        <button class="btn btn-ai" id="generateAiTextBtn" type="button">✨ Сгенерировать иконки, плашки и описание</button>
         <div class="ai-status" id="aiTextStatus"></div>
 
         <div class="presets-scroll" style="margin-top:4px;">
@@ -527,23 +554,33 @@
       </div>
 
       <div class="card-box">
-        <div class="section-label">Ручная правка текстов</div>
+        <div class="section-label">Редактирование инфографики на карточке</div>
         <div class="field"><span>Верхний стикер (бейдж)</span><input type="text" id="badgeInput" value="ХИТ ПРОДАЖ 2026" /></div>
         <div class="field"><span>Подзаголовок / Характеристика</span><input type="text" id="subInput" value="Нержавеющая сталь • Вакуумная изоляция" /></div>
         <div class="grid-2">
-          <div class="field"><span>Плашка слева</span><input type="text" id="b1Input" value="🔥 Тепло до 12 ч" /></div>
-          <div class="field"><span>Плашка справа</span><input type="text" id="b2Input" value="💧 100% герметична" /></div>
+          <div class="field"><span>Иконка + Плашка 1</span><input type="text" id="b1Input" value="🔥 Тепло до 12 ч" /></div>
+          <div class="field"><span>Иконка + Плашка 2</span><input type="text" id="b2Input" value="💧 100% герметична" /></div>
         </div>
         <div class="field"><span>Нижний акцентный баннер</span><input type="text" id="b3Input" value="🛡️ Гарантия 2 года • Подарочная коробка" /></div>
+      </div>
+
+      <div class="card-box">
+        <div class="section-label">
+          <span>SEO-описание для карточки WB / Ozon</span>
+          <span id="copyDescBtn" style="color:#38bdf8; cursor:pointer; text-transform:none;">📋 Скопировать</span>
+        </div>
+        <textarea id="seoDescInput" placeholder="Здесь появится готовое продающее описание товара для маркетплейса...">Стильная термокружка PRO из пищевой нержавеющей стали с двойными стенками и вакуумной изоляцией. Сохраняет напитки горячими до 12 часов, а холодными — до 24 часов. Герметичная крышка с защитой от протекания позволяет носить кружку в сумке или рюкзаке. Идеально подходит для автомобиля, офиса, прогулок и в качестве подарка.</textarea>
       </div>
     </div>
   </div>
 
+  <!-- Нижний закрепленный док -->
   <div class="bottom-dock">
     <button class="btn-demo" id="downloadFreeBtn" type="button" title="Скачать демо с водяным знаком">📥</button>
     <button class="btn-download-hd" id="mainActionBtn" type="button">⭐ Скачать в HD (от 35 ⭐)</button>
   </div>
 
+  <!-- Шторка тарифов Telegram Stars -->
   <div class="modal-overlay" id="paywallModal">
     <div class="modal-sheet">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -584,6 +621,19 @@
     </div>
   </div>
 
+  <!-- Окно сохранения картинки -->
+  <div class="save-modal" id="saveModal">
+    <div style="font-weight:800; font-size:16px; text-align:center;">📲 Ваша карточка готова!</div>
+    <img id="exportedImg" src="" alt="Готовая карточка" />
+    <div style="font-size:12px; color:#cbd5e1; text-align:center; max-width:320px;">
+      Зажмите картинку пальцем и выберите <b>«Сохранить в галерею»</b> (или нажмите кнопку ниже)
+    </div>
+    <div style="display:flex; gap:10px; width:100%; max-width:340px;">
+      <button class="btn btn-ai" id="shareNativeBtn" type="button">📤 Поделиться / Сохранить</button>
+      <button class="btn btn-ghost" id="closeSaveModalBtn" type="button" style="width:auto; padding:0 18px;">Закрыть</button>
+    </div>
+  </div>
+
   <script>
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) {
@@ -596,84 +646,91 @@
     const canvas = document.getElementById("cardCanvas");
     const ctx = canvas.getContext("2d");
     const fileInput = document.getElementById("fileInput");
-    const removeBgBtn = document.getElementById("removeBgBtn");
+    const analyzePhotoBtn = document.getElementById("analyzePhotoBtn");
     const restoreBgBtn = document.getElementById("restoreBgBtn");
     const statusBox = document.getElementById("statusBox");
 
     let originalImg = null;
     let productImg = null;
-    let aiBgImg = null;
     let currentTheme = "wb_bright";
     let podiumStyle = "disc";
+    let bokehSeed = 1;
 
     let credits = Number(localStorage.getItem("mp_studio_credits") || 0);
     let selectedStars = 150;
     let selectedCredits = 10;
     let selectedTitle = "Пакет 10 карточек HD";
+    let lastExportBlob = null;
 
     const THEMES = {
       wb_bright: {
-        prompt: "3d studio product photography background, purple and magenta neon podium, soft volumetric studio lighting, glossy abstract shapes, bokeh, empty center for product, 8k resolution, no text, no watermark",
-        bgTop: "#3b0764", bgMid: "#1e1b4b", bgBottom: "#0f0a1e",
-        glow: "rgba(236, 72, 153, 0.38)", rim: "rgba(168, 85, 247, 0.25)",
-        podiumTop: "#6d28d9", podiumSide: "#2e1065",
+        bgTop: "#3b0764", bgMid: "#1e1b4b", bgBottom: "#090614",
+        glow: "rgba(236, 72, 153, 0.45)", rim: "rgba(168, 85, 247, 0.35)",
+        bokeh: "rgba(244, 114, 182, 0.14)",
+        podiumTop: "#7c3aed", podiumSide: "#2e1065",
         badgeBg: "#ec4899", badgeText: "#ffffff",
         titleColor: "#ffffff", subColor: "#e9d5ff",
-        pillBg: "rgba(15, 10, 30, 0.75)", pillBorder: "rgba(236, 72, 153, 0.7)", pillText: "#ffffff"
+        pillBg: "rgba(15, 10, 30, 0.78)", pillBorder: "rgba(236, 72, 153, 0.75)", pillText: "#ffffff"
       },
       dark_luxury: {
-        prompt: "luxury dark black marble podium, warm golden rim light rays, dramatic dark moody studio background, bokeh, empty center stage for product, 8k commercial photography, no text",
-        bgTop: "#1c1f2b", bgMid: "#11131a", bgBottom: "#07080b",
-        glow: "rgba(245, 158, 11, 0.25)", rim: "rgba(251, 191, 36, 0.15)",
-        podiumTop: "#33384a", podiumSide: "#161922",
+        bgTop: "#222634", bgMid: "#11131a", bgBottom: "#050608",
+        glow: "rgba(245, 158, 11, 0.35)", rim: "rgba(251, 191, 36, 0.25)",
+        bokeh: "rgba(251, 191, 36, 0.12)",
+        podiumTop: "#3b4154", podiumSide: "#141720",
         badgeBg: "#f59e0b", badgeText: "#090a0f",
         titleColor: "#ffffff", subColor: "#cbd5e1",
-        pillBg: "rgba(10, 12, 18, 0.78)", pillBorder: "rgba(245, 158, 11, 0.6)", pillText: "#fef3c7"
+        pillBg: "rgba(10, 12, 18, 0.8)", pillBorder: "rgba(245, 158, 11, 0.65)", pillText: "#fef3c7"
       },
       tech_blue: {
-        prompt: "futuristic cyber tech studio podium, deep navy blue background, glowing cyan neon rim light, sleek metallic pedestal, empty center for gadget product, 8k render, no text",
         bgTop: "#0c4a6e", bgMid: "#0f172a", bgBottom: "#020617",
-        glow: "rgba(56, 189, 248, 0.32)", rim: "rgba(14, 165, 233, 0.2)",
+        glow: "rgba(56, 189, 248, 0.4)", rim: "rgba(14, 165, 233, 0.28)",
+        bokeh: "rgba(56, 189, 248, 0.14)",
         podiumTop: "#1e293b", podiumSide: "#090d16",
         badgeBg: "#38bdf8", badgeText: "#020617",
         titleColor: "#f8fafc", subColor: "#bae6fd",
-        pillBg: "rgba(2, 6, 23, 0.78)", pillBorder: "rgba(56, 189, 248, 0.6)", pillText: "#e0f2fe"
+        pillBg: "rgba(2, 6, 23, 0.8)", pillBorder: "rgba(56, 189, 248, 0.65)", pillText: "#e0f2fe"
       },
       eco_minimal: {
-        prompt: "minimalist organic cosmetic podium made of beige travertine stone, warm sunlight shadows, soft green eucalyptus leaves blurred in background, clean aesthetic studio, empty center, 8k, no text",
-        bgTop: "#f7f4ed", bgMid: "#ede8dc", bgBottom: "#dfd7c5",
-        glow: "rgba(101, 163, 13, 0.16)", rim: "rgba(255, 255, 255, 0.6)",
-        podiumTop: "#d6ceb8", podiumSide: "#b8ae93",
+        bgTop: "#f7f4ed", bgMid: "#eae4d5", bgBottom: "#d8ceb8",
+        glow: "rgba(132, 204, 22, 0.22)", rim: "rgba(255, 255, 255, 0.8)",
+        bokeh: "rgba(101, 163, 13, 0.1)",
+        podiumTop: "#cfc6b0", podiumSide: "#afa489",
         badgeBg: "#3f6212", badgeText: "#ffffff",
         titleColor: "#1c1917", subColor: "#44403c",
-        pillBg: "rgba(255, 255, 255, 0.88)", pillBorder: "rgba(63, 98, 18, 0.45)", pillText: "#1c1917"
+        pillBg: "rgba(255, 255, 255, 0.9)", pillBorder: "rgba(63, 98, 18, 0.45)", pillText: "#1c1917"
       },
       sale_red: {
-        prompt: "dramatic crimson red and black studio stage, intense spotlight from above, glossy dark pedestal, high contrast commercial advertising background, empty center, 8k, no text",
-        bgTop: "#7f1d1d", bgMid: "#18181b", bgBottom: "#09090b",
-        glow: "rgba(239, 68, 68, 0.35)", rim: "rgba(248, 113, 113, 0.2)",
+        bgTop: "#881337", bgMid: "#18181b", bgBottom: "#070709",
+        glow: "rgba(244, 63, 94, 0.42)", rim: "rgba(251, 113, 133, 0.25)",
+        bokeh: "rgba(244, 63, 94, 0.14)",
         podiumTop: "#27272a", podiumSide: "#09090b",
         badgeBg: "#ef4444", badgeText: "#ffffff",
         titleColor: "#ffffff", subColor: "#fecaca",
-        pillBg: "rgba(9, 9, 11, 0.8)", pillBorder: "rgba(239, 68, 68, 0.65)", pillText: "#ffffff"
+        pillBg: "rgba(9, 9, 11, 0.82)", pillBorder: "rgba(239, 68, 68, 0.7)", pillText: "#ffffff"
       },
       mint_fresh: {
-        prompt: "fresh emerald and turquoise glass podium, water ripples reflection, bright clean studio light, refreshing aqua atmosphere, empty center for product, 8k photography, no text",
-        bgTop: "#115e59", bgMid: "#064e3b", bgBottom: "#022c22",
-        glow: "rgba(45, 212, 191, 0.3)", rim: "rgba(94, 234, 212, 0.2)",
+        bgTop: "#115e59", bgMid: "#064e3b", bgBottom: "#02241c",
+        glow: "rgba(45, 212, 191, 0.38)", rim: "rgba(94, 234, 212, 0.25)",
+        bokeh: "rgba(45, 212, 191, 0.14)",
         podiumTop: "#0f766e", podiumSide: "#042f2e",
         badgeBg: "#2dd4bf", badgeText: "#042f2e",
         titleColor: "#ffffff", subColor: "#ccfbf1",
-        pillBg: "rgba(2, 44, 34, 0.78)", pillBorder: "rgba(45, 212, 191, 0.6)", pillText: "#f0fdfa"
+        pillBg: "rgba(2, 44, 34, 0.8)", pillBorder: "rgba(45, 212, 191, 0.65)", pillText: "#f0fdfa"
       }
     };
 
     const PRESETS = {
-      thermo: { theme: "dark_luxury", badge: "ХИТ ПРОДАЖ 2026", title: "ТЕРМОКРУЖКА PRO", sub: "Нержавеющая сталь • Вакуумная изоляция", b1: "🔥 Тепло до 12 ч", b2: "💧 100% герметична", b3: "🛡️ Гарантия 2 года • Подарочная коробка" },
-      tech: { theme: "tech_blue", badge: "НОВИНКА • ANC", title: "НАУШНИКИ PRO MAX", sub: "Активное шумоподавление • Bluetooth 5.4", b1: "🔋 До 36 ч работы", b2: "🎙️ 4 микрофона ENC", b3: "⚡ Быстрая зарядка Type-C за 15 минут" },
-      cosmetic: { theme: "eco_minimal", badge: "100% ОРГАНИК", title: "СЫВОРОТКА ДЛЯ ЛИЦА", sub: "Гиалуроновая кислота + Витамин С", b1: "🌿 Без парабенов", b2: "💧 Глубокое увлажнение", b3: "✨ Видимый эффект уже через 7 дней" },
-      clothes: { theme: "wb_bright", badge: "ТРЕНД СЕЗОНА", title: "ХУДИ ОВЕРСАЙЗ", sub: "Плотный футер 3-нитка • 100% хлопок", b1: "🧶 Не скатывается", b2: "📐 Идеальная посадка", b3: "🚚 Доставка завтра • Все размеры в наличии" }
+      thermo: { theme: "dark_luxury", badge: "ХИТ ПРОДАЖ 2026", title: "ТЕРМОКРУЖКА PRO", sub: "Нержавеющая сталь • Вакуумная изоляция", b1: "🔥 Тепло до 12 ч", b2: "💧 100% герметична", b3: "🛡️ Гарантия 2 года • Подарочная коробка", desc: "Стильная термокружка PRO из пищевой нержавеющей стали с двойными стенками. Сохраняет напитки горячими до 12 часов, а холодными — до 24 часов. Герметичная крышка с защитой от протекания." },
+      tech: { theme: "tech_blue", badge: "НОВИНКА • ANC", title: "НАУШНИКИ PRO MAX", sub: "Активное шумоподавление • Bluetooth 5.4", b1: "🔋 До 36 ч работы", b2: "🎙️ 4 микрофона ENC", b3: "⚡ Быстрая зарядка Type-C за 15 минут", desc: "Беспроводные наушники PRO MAX с активным шумоподавлением ANC и чистым объемным звуком. До 36 часов автономной работы с кейсом, быстрая зарядка Type-C и 4 микрофона для четких звонков." },
+      cosmetic: { theme: "eco_minimal", badge: "100% ОРГАНИК", title: "СЫВОРОТКА ДЛЯ ЛИЦА", sub: "Гиалуроновая кислота + Витамин С", b1: "🌿 Без парабенов", b2: "💧 Глубокое увлажнение", b3: "✨ Видимый эффект уже через 7 дней", desc: "Увлажняющая сыворотка для лица с гиалуроновой кислотой и витамином С. Выравнивает тон кожи, глубоко питает и придает естественное сияние без липкости. Подходит для всех типов кожи." },
+      clothes: { theme: "wb_bright", badge: "ТРЕНД СЕЗОНА", title: "ХУДИ ОВЕРСАЙЗ", sub: "Плотный футер 3-нитка • 100% хлопок", b1: "🧶 Не скатывается", b2: "📐 Идеальная посадка", b3: "🚚 Доставка завтра • Все размеры в наличии", desc: "Базовое худи свободного кроя оверсайз из плотного премиального футера 3-нитки. Не вытягивается после стирки, не образует катышков и комфортно сидит на любой фигуре." }
     };
+
+    function applyThemeById(themeId) {
+      if (!THEMES[themeId]) return;
+      currentTheme = themeId;
+      document.querySelectorAll(".theme-card").forEach(c => c.classList.toggle("active", c.dataset.theme === themeId));
+    }
 
     function updateCreditsUI() {
       const topBtn = document.getElementById("topProBtn");
@@ -708,63 +765,80 @@
       ctx.closePath();
     }
 
+    function seededRand(seed) {
+      let x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    }
+
     function drawCard() {
       const t = THEMES[currentTheme];
       const W = canvas.width;
       const H = canvas.height;
 
-      if (aiBgImg) {
-        ctx.drawImage(aiBgImg, 0, 0, W, H);
-        const topShade = ctx.createLinearGradient(0, 0, 0, 360);
-        topShade.addColorStop(0, "rgba(0,0,0,0.62)");
-        topShade.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = topShade;
-        ctx.fillRect(0, 0, W, 360);
-      } else {
-        const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-        bgGrad.addColorStop(0, t.bgTop);
-        bgGrad.addColorStop(0.55, t.bgMid);
-        bgGrad.addColorStop(1, t.bgBottom);
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, W, H);
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+      bgGrad.addColorStop(0, t.bgTop);
+      bgGrad.addColorStop(0.55, t.bgMid);
+      bgGrad.addColorStop(1, t.bgBottom);
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
 
-        const radGrad = ctx.createRadialGradient(W / 2, H * 0.56, 30, W / 2, H * 0.56, 470);
-        radGrad.addColorStop(0, t.glow);
-        radGrad.addColorStop(0.6, t.rim);
-        radGrad.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = radGrad;
-        ctx.fillRect(0, 0, W, H);
+      ctx.save();
+      for (let i = 0; i < 14; i++) {
+        const bx = seededRand(bokehSeed * 10 + i) * W;
+        const by = 220 + seededRand(bokehSeed * 20 + i) * (H - 350);
+        const br = 35 + seededRand(bokehSeed * 30 + i) * 110;
+        const bGrad = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+        bGrad.addColorStop(0, t.bokeh);
+        bGrad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = bGrad;
+        ctx.beginPath();
+        ctx.arc(bx, by, br, 0, Math.PI * 2);
+        ctx.fill();
       }
+      ctx.restore();
+
+      const radGrad = ctx.createRadialGradient(W / 2, H * 0.56, 30, W / 2, H * 0.56, 480);
+      radGrad.addColorStop(0, t.glow);
+      radGrad.addColorStop(0.55, t.rim);
+      radGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = radGrad;
+      ctx.fillRect(0, 0, W, H);
 
       const podY = 935;
-      if (!aiBgImg && podiumStyle === "disc") {
+      if (podiumStyle === "disc") {
         ctx.save();
         ctx.fillStyle = t.podiumSide;
         ctx.beginPath();
-        ctx.ellipse(W / 2, podY + 34, 295, 58, 0, 0, Math.PI * 2);
+        ctx.ellipse(W / 2, podY + 36, 300, 60, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        const podGrad = ctx.createLinearGradient(W / 2 - 295, podY, W / 2 + 295, podY);
+        const podGrad = ctx.createLinearGradient(W / 2 - 300, podY, W / 2 + 300, podY);
         podGrad.addColorStop(0, t.podiumSide);
         podGrad.addColorStop(0.5, t.podiumTop);
         podGrad.addColorStop(1, t.podiumSide);
         ctx.fillStyle = podGrad;
         ctx.beginPath();
-        ctx.ellipse(W / 2, podY, 295, 58, 0, 0, Math.PI * 2);
+        ctx.ellipse(W / 2, podY, 300, 60, 0, 0, Math.PI * 2);
         ctx.fill();
 
+        ctx.strokeStyle = "rgba(255,255,255,0.22)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(W / 2, podY, 298, 58, 0, Math.PI, Math.PI * 2);
+        ctx.stroke();
+
         const shadowGrad = ctx.createRadialGradient(W / 2, podY, 10, W / 2, podY, 195);
-        shadowGrad.addColorStop(0, "rgba(0,0,0,0.6)");
+        shadowGrad.addColorStop(0, "rgba(0,0,0,0.65)");
         shadowGrad.addColorStop(1, "rgba(0,0,0,0)");
         ctx.fillStyle = shadowGrad;
         ctx.beginPath();
         ctx.ellipse(W / 2, podY, 195, 34, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
-      } else if (podiumStyle === "shadow" || (aiBgImg && podiumStyle !== "none")) {
+      } else if (podiumStyle === "shadow") {
         ctx.save();
         const floatShadow = ctx.createRadialGradient(W / 2, podY + 15, 15, W / 2, podY + 15, 240);
-        floatShadow.addColorStop(0, "rgba(0,0,0,0.65)");
+        floatShadow.addColorStop(0, "rgba(0,0,0,0.68)");
         floatShadow.addColorStop(1, "rgba(0,0,0,0)");
         ctx.fillStyle = floatShadow;
         ctx.beginPath();
@@ -799,12 +873,12 @@
         roundRect(ctx, W / 2 - 165, 440, 330, 390, 30);
         ctx.stroke();
 
-        ctx.fillStyle = aiBgImg ? "#ffffff" : t.titleColor;
+        ctx.fillStyle = t.titleColor;
         ctx.font = "800 24px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("МЕСТО ДЛЯ ТОВАРА", W / 2, 620);
 
-        ctx.fillStyle = aiBgImg ? "#e2e8f0" : t.subColor;
+        ctx.fillStyle = t.subColor;
         ctx.font = "500 18px sans-serif";
         ctx.fillText("Загрузите фото во вкладке «Товар»", W / 2, 656);
         ctx.restore();
@@ -826,14 +900,14 @@
       }
 
       const title = document.getElementById("titleInput").value.trim();
-      ctx.fillStyle = aiBgImg ? "#ffffff" : t.titleColor;
+      ctx.fillStyle = t.titleColor;
       ctx.font = "900 62px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       ctx.fillText(title, W / 2, 124, W - 80);
 
       const sub = document.getElementById("subInput").value.trim();
-      ctx.fillStyle = aiBgImg ? "#f1f5f9" : t.subColor;
+      ctx.fillStyle = t.subColor;
       ctx.font = "600 27px sans-serif";
       ctx.fillText(sub, W / 2, 202, W - 90);
 
@@ -876,12 +950,39 @@
       }
     }
 
-    function downloadCanvas(filename) {
+    function exportCardImage(filename) {
+      drawCard();
+      const dataUrl = canvas.toDataURL("image/png");
+
       const link = document.createElement("a");
       link.download = filename;
-      link.href = canvas.toDataURL("image/png");
+      link.href = dataUrl;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+
+      canvas.toBlob((blob) => {
+        lastExportBlob = blob;
+        document.getElementById("exportedImg").src = dataUrl;
+        document.getElementById("saveModal").classList.add("open");
+      }, "image/png");
     }
+
+    document.getElementById("shareNativeBtn").addEventListener("click", async () => {
+      if (!lastExportBlob) return;
+      const file = new File([lastExportBlob], "mp-card-900x1200.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: "Карточка товара WB/Ozon" });
+        } catch (e) {}
+      } else {
+        alert("Зажмите картинку на экране пальцем и нажмите «Сохранить изображение».");
+      }
+    });
+
+    document.getElementById("closeSaveModalBtn").addEventListener("click", () => {
+      document.getElementById("saveModal").classList.remove("open");
+    });
 
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -894,9 +995,7 @@
 
     document.querySelectorAll(".theme-card").forEach(card => {
       card.addEventListener("click", () => {
-        document.querySelectorAll(".theme-card").forEach(c => c.classList.remove("active"));
-        card.classList.add("active");
-        currentTheme = card.dataset.theme;
+        applyThemeById(card.dataset.theme);
         drawCard();
       });
     });
@@ -910,33 +1009,20 @@
       });
     });
 
-    fileInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      document.getElementById("uploadLabelText").textContent = "✅ Загружено: " + file.name;
-
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = () => {
-          originalImg = img;
-          productImg = img;
-          removeBgBtn.disabled = false;
-          restoreBgBtn.disabled = false;
-          drawCard();
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    function runSmartCutout() {
+    // Автоматическая вырезка фона снаружи (Flood-Fill)
+    function runFloodFillCutout() {
       if (!originalImg) return;
       const tol = Number(document.getElementById("tolRange").value);
+
+      const maxSide = 900;
+      const origW = originalImg.naturalWidth || originalImg.width;
+      const origH = originalImg.naturalHeight || originalImg.height;
+      const scaleRatio = Math.min(1, maxSide / Math.max(origW, origH));
+      const w = Math.round(origW * scaleRatio);
+      const h = Math.round(origH * scaleRatio);
+
       const tempCanvas = document.createElement("canvas");
       const tCtx = tempCanvas.getContext("2d");
-      const w = originalImg.naturalWidth || originalImg.width;
-      const h = originalImg.naturalHeight || originalImg.height;
       tempCanvas.width = w;
       tempCanvas.height = h;
       tCtx.drawImage(originalImg, 0, 0, w, h);
@@ -949,16 +1035,70 @@
       corners.forEach(idx => { bgR += data[idx]; bgG += data[idx + 1]; bgB += data[idx + 2]; });
       bgR /= 4; bgG /= 4; bgB /= 4;
 
-      const feather = 16;
-      for (let i = 0; i < data.length; i += 4) {
-        const dr = data[i] - bgR;
-        const dg = data[i + 1] - bgG;
-        const db = data[i + 2] - bgB;
-        const dist = Math.sqrt(dr * dr + dg * dg + db * db);
-        if (dist < tol) {
-          data[i + 3] = 0;
-        } else if (dist < tol + feather) {
-          data[i + 3] = Math.min(data[i + 3], ((dist - tol) / feather) * 255);
+      const visited = new Uint8Array(w * h);
+      const mask = new Uint8Array(w * h);
+      const queue = new Int32Array(w * h);
+      let head = 0, tail = 0;
+
+      function colorDist(idx) {
+        const dr = data[idx] - bgR;
+        const dg = data[idx + 1] - bgG;
+        const db = data[idx + 2] - bgB;
+        return Math.sqrt(dr * dr + dg * dg + db * db);
+      }
+
+      for (let x = 0; x < w; x++) {
+        const top = x;
+        const bot = (h - 1) * w + x;
+        if (!visited[top] && colorDist(top * 4) < tol) { visited[top] = 1; mask[top] = 1; queue[tail++] = top; }
+        if (!visited[bot] && colorDist(bot * 4) < tol) { visited[bot] = 1; mask[bot] = 1; queue[tail++] = bot; }
+      }
+      for (let y = 0; y < h; y++) {
+        const left = y * w;
+        const right = y * w + (w - 1);
+        if (!visited[left] && colorDist(left * 4) < tol) { visited[left] = 1; mask[left] = 1; queue[tail++] = left; }
+        if (!visited[right] && colorDist(right * 4) < tol) { visited[right] = 1; mask[right] = 1; queue[tail++] = right; }
+      }
+
+      while (head < tail) {
+        const pos = queue[head++];
+        const px = pos % w;
+        const py = (pos - px) / w;
+
+        const neighbors = [];
+        if (px > 0) neighbors.push(pos - 1);
+        if (px < w - 1) neighbors.push(pos + 1);
+        if (py > 0) neighbors.push(pos - w);
+        if (py < h - 1) neighbors.push(pos + w);
+
+        for (let i = 0; i < neighbors.length; i++) {
+          const n = neighbors[i];
+          if (!visited[n]) {
+            visited[n] = 1;
+            if (colorDist(n * 4) < tol) {
+              mask[n] = 1;
+              queue[tail++] = n;
+            }
+          }
+        }
+      }
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const p = y * w + x;
+          const idx = p * 4;
+          if (mask[p] === 1) {
+            data[idx + 3] = 0;
+          } else {
+            let bgNeighbors = 0;
+            if (x > 0 && mask[p - 1]) bgNeighbors++;
+            if (x < w - 1 && mask[p + 1]) bgNeighbors++;
+            if (y > 0 && mask[p - w]) bgNeighbors++;
+            if (y < h - 1 && mask[p + w]) bgNeighbors++;
+            if (bgNeighbors > 0) {
+              data[idx + 3] = Math.round(data[idx + 3] * (1 - bgNeighbors * 0.18));
+            }
+          }
         }
       }
 
@@ -971,63 +1111,130 @@
       cleanImg.src = tempCanvas.toDataURL("image/png");
     }
 
-    removeBgBtn.addEventListener("click", () => {
-      document.getElementById("toleranceBox").style.display = "flex";
+    // Сжимаем загруженное фото до миниатюры 380px для Vision AI
+    function getThumbBase64(img) {
+      const c = document.createElement("canvas");
+      const maxS = 380;
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+      const r = Math.min(1, maxS / Math.max(w, h));
+      c.width = Math.round(w * r);
+      c.height = Math.round(h * r);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      return c.toDataURL("image/jpeg", 0.75);
+    }
+
+    // Применение JSON-ответа от ИИ на карточку и в поля редактирования
+    function applyAiContent(parsed) {
+      if (parsed.theme) applyThemeById(parsed.theme);
+      if (parsed.badge) document.getElementById("badgeInput").value = parsed.badge;
+      if (parsed.title) document.getElementById("titleInput").value = parsed.title;
+      if (parsed.sub) document.getElementById("subInput").value = parsed.sub;
+      if (parsed.b1) document.getElementById("b1Input").value = parsed.b1;
+      if (parsed.b2) document.getElementById("b2Input").value = parsed.b2;
+      if (parsed.b3) document.getElementById("b3Input").value = parsed.b3;
+      if (parsed.description) document.getElementById("seoDescInput").value = parsed.description;
+      drawCard();
+    }
+
+    // VISION AI: Распознавание товара по фото + авто-заполнение иконок, плашек и SEO-описания
+    async function analyzeProductWithVisionAI() {
+      if (!originalImg) return;
+      analyzePhotoBtn.disabled = true;
       statusBox.style.display = "block";
-      statusBox.textContent = "✂️ Фон удален! Ползунком ниже можно подстроить края.";
-      runSmartCutout();
+      statusBox.textContent = "🧠 Vision AI определяет товар по фото, подбирает иконки, тему и пишет SEO-описание...";
+
+      const thumbDataUrl = getThumbBase64(originalImg);
+      const systemPrompt = `Ты топ-дизайнер и SEO-маркетолог Wildberries и Ozon. Посмотри на фото товара и определи, что это за товар.
+Верни СТРОГО валидный JSON без markdown с полями:
+- "theme": выбери наиболее подходящую из ["wb_bright", "dark_luxury", "tech_blue", "eco_minimal", "sale_red", "mint_fresh"]
+- "badge": короткий верхний стикер капсом до 18 символов (например "ХИТ СЕЗОНА 2026")
+- "title": название товара на русском капсом до 22 символов (например "КРОССОВКИ МУЖСКИЕ")
+- "sub": ключевая фишка товара до 36 символов
+- "b1": подходящая эмодзи-иконка + преимущество 1 (до 18 символов)
+- "b2": подходящая эмодзи-иконка + преимущество 2 (до 18 символов)
+- "b3": подходящая эмодзи-иконка + нижний УТП-баннер (до 38 символов)
+- "description": продающее SEO-описание товара для WB/Ozon на русском (3-4 предложения, 280-400 символов).`;
+
+      try {
+        const res = await fetch("https://text.pollinations.ai/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: systemPrompt },
+                  { type: "image_url", image_url: { url: thumbDataUrl } }
+                ]
+              }
+            ],
+            model: "openai",
+            jsonMode: true
+          })
+        });
+
+        const rawText = await res.text();
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("No JSON");
+        const parsed = JSON.parse(jsonMatch[0]);
+
+        applyAiContent(parsed);
+        statusBox.textContent = `✅ ИИ распознал: «${parsed.title || "Товар"}» — иконки, плашки и SEO-описание готовы (можно править во вкладке «Тексты & SEO»)!`;
+      } catch (err) {
+        statusBox.textContent = "✂️ Фон вырезан! Для авто-генерации текстов и иконок перейдите во вкладку «✍️ Тексты & SEO».";
+      } finally {
+        analyzePhotoBtn.disabled = false;
+      }
+    }
+
+    // При загрузке фото: сразу вырезаем фон И запускаем Vision AI распознавание
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById("uploadLabelText").textContent = "✅ Фото: " + file.name;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          originalImg = img;
+          productImg = img;
+          analyzePhotoBtn.disabled = false;
+          restoreBgBtn.disabled = false;
+          document.getElementById("toleranceBox").style.display = "flex";
+          runFloodFillCutout();
+          analyzeProductWithVisionAI();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    analyzePhotoBtn.addEventListener("click", () => {
+      runFloodFillCutout();
+      analyzeProductWithVisionAI();
     });
 
     restoreBgBtn.addEventListener("click", () => {
       if (!originalImg) return;
       productImg = originalImg;
       document.getElementById("toleranceBox").style.display = "none";
-      statusBox.style.display = "none";
       drawCard();
     });
 
     document.getElementById("tolRange").addEventListener("input", (e) => {
       document.getElementById("tolVal").textContent = e.target.value;
-      runSmartCutout();
+      runFloodFillCutout();
     });
 
-    const generateAiBgBtn = document.getElementById("generateAiBgBtn");
-    const clearAiBgBtn = document.getElementById("clearAiBgBtn");
-    const aiBgStatus = document.getElementById("aiBgStatus");
-
-    generateAiBgBtn.addEventListener("click", () => {
-      const themeObj = THEMES[currentTheme];
-      const seed = Math.floor(Math.random() * 999999);
-      const encodedPrompt = encodeURIComponent(themeObj.prompt);
-      const aiUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=900&height=1200&seed=${seed}&nologo=true&model=flux`;
-
-      generateAiBgBtn.disabled = true;
-      aiBgStatus.style.display = "block";
-      aiBgStatus.textContent = "🎨 Нейросеть Flux рендерит студийный 3D-подиум (~5–8 сек)...";
-
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        aiBgImg = img;
-        drawCard();
-        generateAiBgBtn.disabled = false;
-        clearAiBgBtn.style.display = "flex";
-        aiBgStatus.textContent = "✅ Готово! Нажмите ещё раз, если нужен другой ракурс подиума.";
-      };
-      img.onerror = () => {
-        generateAiBgBtn.disabled = false;
-        aiBgStatus.textContent = "⚠️ Нейросеть перегружена, попробуйте нажать ещё раз.";
-      };
-      img.src = aiUrl;
-    });
-
-    clearAiBgBtn.addEventListener("click", () => {
-      aiBgImg = null;
-      clearAiBgBtn.style.display = "none";
-      aiBgStatus.style.display = "none";
+    document.getElementById("generateAiBgBtn").addEventListener("click", () => {
+      bokehSeed = Math.floor(Math.random() * 1000) + 1;
       drawCard();
     });
 
+    // Генерация иконок, плашек и SEO-описания по названию товара (во вкладке Тексты)
     const generateAiTextBtn = document.getElementById("generateAiTextBtn");
     const aiTextStatus = document.getElementById("aiTextStatus");
 
@@ -1035,9 +1242,15 @@
       const productTitle = document.getElementById("titleInput").value.trim() || "Товар для маркетплейса";
       generateAiTextBtn.disabled = true;
       aiTextStatus.style.display = "block";
-      aiTextStatus.textContent = "✍️ ИИ-маркетолог пишет продающие триггеры для WB/Ozon...";
+      aiTextStatus.textContent = "✍️ Нейросеть подбирает тематические иконки, плашки и SEO-описание...";
 
-      const prompt = `Ты топ-дизайнер карточек Wildberries и Ozon. Для товара "${productTitle}" придумай короткие продающие тексты на русском. Верни СТРОГО валидный JSON без markdown с полями: badge (до 18 символов капсом), sub (до 36 символов), b1 (эмодзи + до 18 символов), b2 (эмодзи + до 18 символов), b3 (эмодзи + до 38 символов).`;
+      const prompt = `Ты топ-дизайнер карточек Wildberries и Ozon. Для товара "${productTitle}" подбери тематические эмодзи-иконки, короткие плашки и SEO-описание. Верни СТРОГО валидный JSON без markdown с полями:
+- "badge": стикер капсом до 18 символов
+- "sub": подзаголовок до 36 символов
+- "b1": эмодзи-иконка + преимущество 1 (до 18 символов)
+- "b2": эмодзи-иконка + преимущество 2 (до 18 символов)
+- "b3": эмодзи-иконка + нижний УТП-баннер (до 38 символов)
+- "description": продающее SEO-описание для карточки WB/Ozon на русском (3-4 предложения).`;
 
       try {
         const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
@@ -1046,18 +1259,26 @@
         if (!jsonMatch) throw new Error("Parse error");
         const parsed = JSON.parse(jsonMatch[0]);
 
-        if (parsed.badge) document.getElementById("badgeInput").value = parsed.badge;
-        if (parsed.sub) document.getElementById("subInput").value = parsed.sub;
-        if (parsed.b1) document.getElementById("b1Input").value = parsed.b1;
-        if (parsed.b2) document.getElementById("b2Input").value = parsed.b2;
-        if (parsed.b3) document.getElementById("b3Input").value = parsed.b3;
-
-        drawCard();
-        aiTextStatus.textContent = "✅ Продающие плашки сгенерированы!";
+        applyAiContent(parsed);
+        aiTextStatus.textContent = "✅ Иконки, плашки и SEO-описание обновлены! Можете отредактировать любое поле ниже.";
       } catch (err) {
-        aiTextStatus.textContent = "⚠️ Не удалось связаться с текстовым ИИ. Выберите шаблон ниже или впишите вручную.";
+        aiTextStatus.textContent = "⚠️ ИИ-сервер перегружен. Выберите готовый шаблон ниже или отредактируйте поля вручную.";
       } finally {
         generateAiTextBtn.disabled = false;
+      }
+    });
+
+    // Копирование SEO-описания в буфер обмена
+    document.getElementById("copyDescBtn").addEventListener("click", async () => {
+      const descText = document.getElementById("seoDescInput").value;
+      try {
+        await navigator.clipboard.writeText(descText);
+        const btn = document.getElementById("copyDescBtn");
+        btn.textContent = "✅ Скопировано!";
+        setTimeout(() => { btn.textContent = "📋 Скопировать"; }, 2000);
+      } catch (e) {
+        document.getElementById("seoDescInput").select();
+        document.execCommand("copy");
       }
     });
 
@@ -1078,27 +1299,27 @@
     document.querySelectorAll(".chip").forEach(btn => {
       btn.addEventListener("click", () => {
         const p = PRESETS[btn.dataset.preset];
-        currentTheme = p.theme;
-        document.querySelectorAll(".theme-card").forEach(c => c.classList.toggle("active", c.dataset.theme === p.theme));
+        applyThemeById(p.theme);
         document.getElementById("badgeInput").value = p.badge;
         document.getElementById("titleInput").value = p.title;
         document.getElementById("subInput").value = p.sub;
         document.getElementById("b1Input").value = p.b1;
         document.getElementById("b2Input").value = p.b2;
         document.getElementById("b3Input").value = p.b3;
+        document.getElementById("seoDescInput").value = p.desc;
         drawCard();
       });
     });
 
     document.getElementById("downloadFreeBtn").addEventListener("click", () => {
-      downloadCanvas("mp-card-demo.png");
+      exportCardImage("mp-card-demo.png");
     });
 
     const modal = document.getElementById("paywallModal");
     const openModal = () => {
       if (credits > 0) {
         const currentCredits = credits;
-        downloadCanvas("mp-card-hd-900x1200.png");
+        exportCardImage("mp-card-hd-900x1200.png");
         if (currentCredits < 1000) {
           credits = Math.max(0, credits - 1);
           localStorage.setItem("mp_studio_credits", String(credits));
